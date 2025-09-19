@@ -166,10 +166,10 @@
         </div>
         
         <div class="controls">
-            <button onclick="previousCard()" id="prevBtn">← Previous</button>
-            <button onclick="toggleDetails()" id="toggleBtn" class="toggle-btn">Show Details</button>
-            <button onclick="shuffleCard()">🔀 Random</button>
-            <button onclick="nextCard()" id="nextBtn">Next →</button>
+            <button id="prevBtn">← Previous</button>
+            <button id="toggleBtn" class="toggle-btn">Show Details</button>
+            <button id="shuffleBtn">🔀 Random</button>
+            <button id="nextBtn">Next →</button>
         </div>
     </div>
 
@@ -251,6 +251,8 @@
         }
 
         function displayCard() {
+            console.log('DisplayCard called, currentIndex:', currentIndex, 'filteredCards length:', filteredCards.length);
+            
             if (filteredCards.length === 0) {
                 document.getElementById('arabic').textContent = 'No results';
                 document.getElementById('transliteration').textContent = '';
@@ -259,6 +261,7 @@
             }
             
             const card = filteredCards[currentIndex];
+            console.log('Current card:', card);
             const cardElement = document.getElementById('mainCard');
             const readStatusElement = document.getElementById('readStatus');
             
@@ -330,26 +333,38 @@
         }
 
         function toggleDetails() {
+            console.log('Toggle details clicked, current state:', showDetails);
             showDetails = !showDetails;
+            console.log('New state:', showDetails);
             displayCard();
         }
 
         function nextCard() {
+            console.log('Next card clicked, current index:', currentIndex, 'total cards:', filteredCards.length);
             if (currentIndex < filteredCards.length - 1) {
                 currentIndex++;
+                console.log('Moving to index:', currentIndex);
                 displayCard();
+            } else {
+                console.log('Already at last card');
             }
         }
 
         function previousCard() {
+            console.log('Previous card clicked, current index:', currentIndex);
             if (currentIndex > 0) {
                 currentIndex--;
+                console.log('Moving to index:', currentIndex);
                 displayCard();
+            } else {
+                console.log('Already at first card');
             }
         }
 
         function shuffleCard() {
-            currentIndex = Math.floor(Math.random() * filteredCards.length);
+            const newIndex = Math.floor(Math.random() * filteredCards.length);
+            console.log('Shuffle clicked, moving from', currentIndex, 'to', newIndex);
+            currentIndex = newIndex;
             displayCard();
         }
 
@@ -379,6 +394,10 @@
         });
 
         document.getElementById('readStatus').addEventListener('click', toggleReadStatus);
+        document.getElementById('prevBtn').addEventListener('click', previousCard);
+        document.getElementById('nextBtn').addEventListener('click', nextCard);
+        document.getElementById('toggleBtn').addEventListener('click', toggleDetails);
+        document.getElementById('shuffleBtn').addEventListener('click', shuffleCard);
 
         document.addEventListener('keydown', function(e) {
             switch(e.key) {
@@ -397,6 +416,17 @@
         console.log('🌐 Quranic Arabic Flashcards loaded successfully!');
         console.log('📊 Total entries:', flashcards.length);
         console.log('⌨️ Shortcuts: D=Details, M=Mark read, Arrows=Navigate, Space=Random');
+        console.log('Current index:', currentIndex);
+        console.log('Filtered cards:', filteredCards.length);
+        
+        // Test that buttons are properly connected
+        setTimeout(() => {
+            console.log('Testing button connections...');
+            const nextBtn = document.getElementById('nextBtn');
+            const toggleBtn = document.getElementById('toggleBtn');
+            console.log('Next button found:', !!nextBtn);
+            console.log('Toggle button found:', !!toggleBtn);
+        }, 100);
     </script>
 </body>
 </html>
