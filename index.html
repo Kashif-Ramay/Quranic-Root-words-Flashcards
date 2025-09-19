@@ -28,10 +28,38 @@
             font-size: 2.2em;
             margin-bottom: 8px;
         }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
         .counter {
             font-size: 1.1em;
-            margin: 8px 0;
             opacity: 0.9;
+        }
+        .progress-stats {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        .daily-word-banner {
+            background: rgba(251, 191, 36, 0.2);
+            border: 1px solid rgba(251, 191, 36, 0.4);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .daily-word-banner:hover {
+            background: rgba(251, 191, 36, 0.3);
+        }
+        .daily-word-banner.active {
+            background: rgba(251, 191, 36, 0.4);
+            border-color: rgba(251, 191, 36, 0.6);
         }
         .search-box {
             width: 100%;
@@ -50,6 +78,30 @@
             margin: 20px 0;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+        }
+        .card.read {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+        .read-status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .read-status.read {
+            background: #22c55e;
+            color: white;
         }
         .badges {
             display: flex;
@@ -182,10 +234,35 @@
         .toggle-btn:hover {
             background: #6d28d9;
         }
+        .notification-btn {
+            background: #f59e0b;
+            font-size: 12px;
+            padding: 8px 12px;
+        }
+        .notification-btn:hover {
+            background: #d97706;
+        }
+        .notification-btn.enabled {
+            background: #10b981;
+        }
         .verse-count {
             font-size: 10px;
             color: #fbbf24;
             margin-left: 5px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #22c55e);
+            border-radius: 3px;
+            transition: width 0.5s ease;
         }
         @media (max-width: 600px) {
             .header h1 { font-size: 1.8em; }
@@ -196,6 +273,7 @@
             .controls button { flex: 1; min-width: 100px; }
             .verse-arabic { font-size: 18px; }
             .verse-translation { font-size: 13px; }
+            .progress-info { justify-content: center; text-align: center; }
         }
     </style>
 </head>
@@ -203,15 +281,29 @@
     <div class="container">
         <div class="header">
             <h1>🕌 Complete Quranic Arabic Flashcards</h1>
-            <div class="counter">
-                <span id="current">1</span> of <span id="total">981</span>
-                <span class="verse-count">📖 981 with verses</span>
+            <div class="progress-info">
+                <div class="counter">
+                    <span id="current">1</span> of <span id="total">981</span>
+                    <span class="verse-count">📖 981 with verses</span>
+                </div>
+                <div class="progress-stats">
+                    <span id="readCount">0</span> read • <span id="progressPercent">0%</span> complete
+                </div>
             </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+        
+        <div class="daily-word-banner" id="dailyWordBanner" style="display:none;">
+            <div>📅 <strong>Daily Word:</strong> <span id="dailyWordText"></span></div>
+            <div style="font-size: 0.8em; margin-top: 5px;">Click to view today's featured root</div>
         </div>
         
         <input type="text" class="search-box" id="searchBox" placeholder="Search roots, meanings, derivatives, or verses...">
         
-        <div class="card">
+        <div class="card" id="mainCard">
+            <div class="read-status" id="readStatus" title="Mark as read">○</div>
             <div class="badges">
                 <span id="typeBadge" class="badge">ROOT</span>
                 <span id="categoryBadge" class="badge badge-soft">Category</span>
@@ -236,6 +328,7 @@
         <div class="controls">
             <button onclick="previousCard()" id="prevBtn">← Previous</button>
             <button onclick="toggleDetails()" id="toggleBtn" class="toggle-btn">Show Details</button>
+            <button onclick="toggleNotifications()" id="notifyBtn" class="notification-btn">🔔 Daily Word</button>
             <button onclick="shuffleCard()">🔀 Random</button>
             <button onclick="nextCard()" id="nextBtn">Next →</button>
         </div>
@@ -28673,6 +28766,143 @@
         let currentIndex = 0;
         let filteredCards = [...flashcards];
         let showDetails = false;
+        let readWords = new Set();
+        let notificationsEnabled = false;
+
+        // Load saved progress
+        function loadProgress() {
+            const saved = localStorage.getItem('quranFlashcardsProgress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                readWords = new Set(data.readWords || []);
+                currentIndex = data.lastIndex || 0;
+                showDetails = data.showDetails || false;
+                notificationsEnabled = data.notificationsEnabled || false;
+            }
+        }
+
+        // Save progress
+        function saveProgress() {
+            const data = {
+                readWords: Array.from(readWords),
+                lastIndex: currentIndex,
+                showDetails: showDetails,
+                notificationsEnabled: notificationsEnabled
+            };
+            localStorage.setItem('quranFlashcardsProgress', JSON.stringify(data));
+        }
+
+        // Daily word functionality
+        function getDailyWord() {
+            const today = new Date().toDateString();
+            const savedDaily = localStorage.getItem('dailyWord');
+            
+            if (savedDaily) {
+                const data = JSON.parse(savedDaily);
+                if (data.date === today) {
+                    return data.wordIndex;
+                }
+            }
+            
+            // Generate new daily word
+            const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
+            const wordIndex = daysSinceEpoch % flashcards.length;
+            
+            localStorage.setItem('dailyWord', JSON.stringify({
+                date: today,
+                wordIndex: wordIndex
+            }));
+            
+            return wordIndex;
+        }
+
+        // Show daily word banner
+        function showDailyWord() {
+            const dailyIndex = getDailyWord();
+            const dailyWord = flashcards[dailyIndex];
+            
+            document.getElementById('dailyWordText').textContent = 
+                dailyWord.root + ' (' + dailyWord.meanings.slice(0,2).join(', ') + ')';
+            document.getElementById('dailyWordBanner').style.display = 'block';
+            
+            document.getElementById('dailyWordBanner').onclick = function() {
+                currentIndex = dailyIndex;
+                filteredCards = [...flashcards];
+                displayCard();
+                document.getElementById('dailyWordBanner').classList.add('active');
+                setTimeout(() => {
+                    document.getElementById('dailyWordBanner').classList.remove('active');
+                }, 1000);
+            };
+        }
+
+        // Notification functionality
+        function toggleNotifications() {
+            if (!('Notification' in window)) {
+                alert('This browser does not support notifications');
+                return;
+            }
+
+            if (Notification.permission === 'granted') {
+                notificationsEnabled = !notificationsEnabled;
+                updateNotificationButton();
+                saveProgress();
+                
+                if (notificationsEnabled) {
+                    scheduleNotification();
+                    new Notification('Daily Quranic Word Enabled!', {
+                        body: 'You will receive a daily word notification.',
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🕌</text></svg>'
+                    });
+                }
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        notificationsEnabled = true;
+                        updateNotificationButton();
+                        saveProgress();
+                        scheduleNotification();
+                    }
+                });
+            }
+        }
+
+        function updateNotificationButton() {
+            const btn = document.getElementById('notifyBtn');
+            if (notificationsEnabled) {
+                btn.textContent = '🔔 Enabled';
+                btn.classList.add('enabled');
+            } else {
+                btn.textContent = '🔔 Daily Word';
+                btn.classList.remove('enabled');
+            }
+        }
+
+        function scheduleNotification() {
+            if (!notificationsEnabled) return;
+            
+            // Schedule for next day at 9 AM
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(9, 0, 0, 0);
+            
+            const timeUntilNotification = tomorrow.getTime() - now.getTime();
+            
+            setTimeout(() => {
+                const dailyIndex = getDailyWord();
+                const dailyWord = flashcards[dailyIndex];
+                
+                new Notification('🕌 Daily Quranic Word', {
+                    body: dailyWord.root + ' - ' + dailyWord.meanings.slice(0,2).join(', '),
+                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🕌</text></svg>',
+                    requireInteraction: true
+                });
+                
+                // Schedule next notification
+                scheduleNotification();
+            }, timeUntilNotification);
+        }
 
         function displayCard() {
             if (filteredCards.length === 0) {
@@ -28688,6 +28918,20 @@
             }
             
             const card = filteredCards[currentIndex];
+            const cardElement = document.getElementById('mainCard');
+            const readStatusElement = document.getElementById('readStatus');
+            
+            // Update read status
+            const isRead = readWords.has(card.id);
+            if (isRead) {
+                cardElement.classList.add('read');
+                readStatusElement.classList.add('read');
+                readStatusElement.textContent = '✓';
+            } else {
+                cardElement.classList.remove('read');
+                readStatusElement.classList.remove('read');
+                readStatusElement.textContent = '○';
+            }
             
             // Basic info
             document.getElementById('arabic').textContent = card.root || '';
@@ -28698,6 +28942,12 @@
             document.getElementById('difficultyBadge').textContent = (card.difficulty || '').toUpperCase();
             document.getElementById('current').textContent = currentIndex + 1;
             document.getElementById('total').textContent = filteredCards.length;
+            
+            // Update progress
+            document.getElementById('readCount').textContent = readWords.size;
+            const progressPercent = Math.round((readWords.size / flashcards.length) * 100);
+            document.getElementById('progressPercent').textContent = progressPercent + '%';
+            document.getElementById('progressFill').style.width = progressPercent + '%';
             
             // Show/hide derivatives
             const derivativesSection = document.getElementById('derivativesSection');
@@ -28737,6 +28987,18 @@
             document.getElementById('prevBtn').disabled = currentIndex === 0;
             document.getElementById('nextBtn').disabled = currentIndex === filteredCards.length - 1;
             document.getElementById('toggleBtn').textContent = showDetails ? 'Hide Details' : 'Show Details';
+            
+            saveProgress();
+        }
+
+        function toggleReadStatus() {
+            const card = filteredCards[currentIndex];
+            if (readWords.has(card.id)) {
+                readWords.delete(card.id);
+            } else {
+                readWords.add(card.id);
+            }
+            displayCard();
         }
 
         function toggleDetails() {
@@ -28791,14 +29053,15 @@
             displayCard();
         }
 
-        // Search with delay
+        // Event listeners
         let searchTimeout;
         document.getElementById('searchBox').addEventListener('input', function() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(searchCards, 300);
         });
 
-        // Keyboard navigation
+        document.getElementById('readStatus').addEventListener('click', toggleReadStatus);
+
         document.addEventListener('keydown', function(e) {
             switch(e.key) {
                 case 'ArrowLeft':
@@ -28815,15 +29078,28 @@
                 case 'D':
                     toggleDetails();
                     break;
+                case 'm':
+                case 'M':
+                    toggleReadStatus();
+                    break;
             }
         });
 
         // Initialize
+        loadProgress();
         displayCard();
-        console.log('🌐 Complete Quranic Arabic Flashcards loaded!');
+        showDailyWord();
+        updateNotificationButton();
+        
+        if (notificationsEnabled) {
+            scheduleNotification();
+        }
+        
+        console.log('🌐 Enhanced Quranic Arabic Flashcards loaded!');
         console.log('📊 Total entries:', flashcards.length);
         console.log('📖 Entries with verses:', flashcards.filter(function(c) { return c.examples && c.examples.length > 0; }).length);
-        console.log('🎯 Press "Show Details" to see derivatives and verses');
+        console.log('🎯 Features: Progress tracking, daily word, notifications');
+        console.log('⌨️ Shortcuts: D=Details, M=Mark read, Arrows=Navigate, Space=Random');
     </script>
 </body>
 </html>
