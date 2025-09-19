@@ -3,430 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quranic Arabic Flashcards - English Only</title>
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <title>Simple Quranic Flashcards Test</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #1e40af, #3b82f6);
-            color: white; min-height: 100vh; padding: 20px;
+            color: white;
+            padding: 20px;
+            text-align: center;
         }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { text-align: center; margin-bottom: 30px; }
-        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
-        .subtitle { font-size: 1.2em; opacity: 0.9; margin-bottom: 20px; }
-        
-        .progress-info {
-            display: flex; justify-content: space-between; align-items: center;
-            margin: 20px 0; flex-wrap: wrap; gap: 15px;
-        }
-        .counter { font-size: 1.1em; }
-        .progress-stats { font-size: 0.9em; opacity: 0.8; }
-        
-        .search-box {
-            width: 100%; padding: 15px; font-size: 16px; border: none;
-            border-radius: 10px; margin-bottom: 25px;
-            background: rgba(255,255,255,0.9); color: #333;
-        }
-        
         .card {
-            background: rgba(255,255,255,0.1); border-radius: 20px; padding: 30px;
-            margin: 25px 0; backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2); position: relative;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 600px;
+            border: 1px solid rgba(255,255,255,0.2);
         }
-        .card.read { background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.4); }
-        
-        .read-status {
-            position: absolute; top: 15px; right: 15px; width: 25px; height: 25px;
-            border-radius: 50%; background: rgba(255,255,255,0.2); cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; transition: all 0.3s;
-        }
-        .read-status.read { background: #22c55e; color: white; }
-        
-        .badges { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .badge {
-            background: rgba(34,197,94,0.8); padding: 6px 12px;
-            border-radius: 15px; font-size: 12px; text-transform: uppercase; font-weight: bold;
-        }
-        .badge-soft { background: rgba(255,255,255,0.2); }
-        
         .arabic {
-            font-size: 3.5em; font-weight: bold; text-align: center; margin: 25px 0;
-            font-family: 'Amiri', 'Times New Roman', serif;
-            direction: rtl; line-height: 1.2;
+            font-size: 3em;
+            margin: 20px 0;
+            font-family: 'Times New Roman', serif;
         }
         .transliteration {
-            font-size: 1.5em; font-style: italic; text-align: center;
-            opacity: 0.9; margin: 15px 0; color: #fbbf24;
+            font-size: 1.5em;
+            font-style: italic;
+            color: #fbbf24;
+            margin: 15px 0;
         }
         .meanings {
-            font-size: 1.3em; text-align: center;
-            background: rgba(255,255,255,0.1); padding: 20px;
-            border-radius: 15px; margin: 20px 0; line-height: 1.5;
+            font-size: 1.2em;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
         }
-        
-        .section {
-            margin: 25px 0; background: rgba(255,255,255,0.05);
-            padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
-        }
-        .section-title {
-            font-size: 14px; color: #fbbf24; margin-bottom: 15px;
-            text-transform: uppercase; font-weight: bold;
-        }
-        
-        .verse {
-            margin: 20px 0; padding: 20px; background: rgba(255,255,255,0.1);
-            border-radius: 15px; border-left: 5px solid #fbbf24;
-        }
-        .verse-arabic {
-            font-size: 22px; margin-bottom: 15px; line-height: 2.2;
-            text-align: right; direction: rtl;
-            font-family: 'Amiri', 'Times New Roman', serif;
-        }
-        .verse-translation {
-            font-size: 16px; line-height: 1.7; margin-bottom: 10px;
-            text-align: left; opacity: 0.95;
-        }
-        .verse-ref {
-            font-size: 13px; color: #fbbf24; font-weight: bold; text-align: center;
-        }
-        
         .controls {
-            display: flex; justify-content: center; gap: 15px;
-            margin-top: 30px; flex-wrap: wrap;
+            margin: 30px 0;
         }
         button {
-            background: #059669; color: white; border: none;
-            padding: 15px 25px; border-radius: 10px; font-size: 16px;
-            cursor: pointer; transition: background 0.3s; font-weight: 600;
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
         }
-        button:hover { background: #047857; }
-        button:disabled { background: #6b7280; cursor: not-allowed; }
-        .toggle-btn { background: #7c3aed; }
-        .toggle-btn:hover { background: #6d28d9; }
-        
-        .progress-bar {
-            width: 100%; height: 8px; background: rgba(255,255,255,0.2);
-            border-radius: 4px; margin: 15px 0; overflow: hidden;
+        button:hover {
+            background: #047857;
         }
-        .progress-fill {
-            height: 100%; background: linear-gradient(90deg, #10b981, #22c55e);
-            border-radius: 4px; transition: width 0.5s ease;
+        .toggle-btn {
+            background: #7c3aed;
         }
-        
-        @media (max-width: 600px) {
-            .header h1 { font-size: 2em; }
-            .arabic { font-size: 2.8em; }
-            .card { padding: 20px; }
-            .controls { gap: 10px; }
-            button { padding: 12px 20px; font-size: 14px; }
+        .toggle-btn:hover {
+            background: #6d28d9;
+        }
+        .verse-section {
+            background: rgba(255,255,255,0.05);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+        .verse {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #fbbf24;
+        }
+        .verse-arabic {
+            font-size: 1.3em;
+            text-align: right;
+            direction: rtl;
+            margin-bottom: 10px;
+            font-family: 'Times New Roman', serif;
+        }
+        .verse-translation {
+            text-align: left;
+            margin-bottom: 8px;
+        }
+        .verse-ref {
+            color: #fbbf24;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .counter {
+            font-size: 1.1em;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🕌 Quranic Arabic Flashcards</h1>
-            <div class="subtitle">English Only - Authentic Roots</div>
-            
-            <div class="progress-info">
-                <div class="counter">
-                    <span id="current">1</span> of <span id="total">3</span>
-                    <span class="verse-count">📖 3 with verses</span>
-                </div>
-                <div class="progress-stats">
-                    <span id="readCount">0</span> read • <span id="progressPercent">0%</span> complete
-                </div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-        </div>
+    <h1>🕌 Simple Quranic Flashcards</h1>
+    
+    <div class="counter">
+        Card <span id="current">1</span> of <span id="total">3</span>
+    </div>
+    
+    <div class="card">
+        <div class="arabic" id="arabic">ك ت ب</div>
+        <div class="transliteration" id="transliteration">k-t-b</div>
+        <div class="meanings" id="meanings">to write, book, decree</div>
         
-        <input type="text" class="search-box" id="searchBox" placeholder="Search roots, meanings, or categories...">
-        
-        <div class="card" id="mainCard">
-            <div class="read-status" id="readStatus" title="Mark as read">○</div>
-            <div class="badges">
-                <span id="typeBadge" class="badge">ROOT</span>
-                <span id="categoryBadge" class="badge badge-soft">knowledge</span>
-                <span id="difficultyBadge" class="badge badge-soft">advanced</span>
-            </div>
-            
-            <div class="arabic" id="arabic">ك ت ب</div>
-            <div class="transliteration" id="transliteration">k-t-b</div>
-            <div class="meanings" id="meanings">to write, book, decree</div>
-            
-            <div class="section" id="versesSection" style="display:none;">
-                <div class="section-title">📖 Quranic Examples <span id="verseCount"></span></div>
-                <div id="verses"></div>
-            </div>
+        <div class="verse-section" id="verseSection">
+            <h3>📖 Quranic Example</h3>
+            <div id="verseContent"></div>
         </div>
-        
-        <div class="controls">
-            <button id="prevBtn">← Previous</button>
-            <button id="toggleBtn" class="toggle-btn">Show Details</button>
-            <button id="shuffleBtn">🔀 Random</button>
-            <button id="nextBtn">Next →</button>
-        </div>
+    </div>
+    
+    <div class="controls">
+        <button id="prevBtn">← Previous</button>
+        <button id="toggleBtn" class="toggle-btn">Show Details</button>
+        <button id="nextBtn">Next →</button>
+        <button id="randomBtn">🔀 Random</button>
+    </div>
+    
+    <div style="margin-top: 30px; font-size: 0.9em; opacity: 0.8;">
+        <p>Use arrow keys to navigate • Press D for details • Press R for random</p>
     </div>
 
     <script>
-        // Clean, working flashcard data
-        const flashcards = [
+        // Simple data
+        const cards = [
             {
-                id: "root_1",
-                root: "ك ت ب",
+                arabic: "ك ت ب",
                 transliteration: "k-t-b",
-                meanings: ["to write", "book", "decree"],
-                category: "knowledge",
-                type: "authentic_root",
-                difficulty: "advanced",
-                examples: [
-                    {
-                        ayahArabic: "ذَلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِّلْمُتَّقِينَ",
-                        translation: "This is the Book about which there is no doubt, a guidance for those conscious of Allah",
-                        ref: "2:2"
-                    }
-                ]
+                meanings: "to write, book, decree",
+                verse: {
+                    arabic: "ذَلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِّلْمُتَّقِينَ",
+                    translation: "This is the Book about which there is no doubt, a guidance for those conscious of Allah",
+                    ref: "2:2"
+                }
             },
             {
-                id: "root_2",
-                root: "ق ر أ",
+                arabic: "ق ر أ",
                 transliteration: "q-r-a",
-                meanings: ["to read", "recite"],
-                category: "knowledge",
-                type: "authentic_root",
-                difficulty: "basic",
-                examples: [
-                    {
-                        ayahArabic: "اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ",
-                        translation: "Recite in the name of your Lord who created",
-                        ref: "96:1"
-                    }
-                ]
+                meanings: "to read, recite",
+                verse: {
+                    arabic: "اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ",
+                    translation: "Recite in the name of your Lord who created",
+                    ref: "96:1"
+                }
             },
             {
-                id: "root_3",
-                root: "ص ل ى",
+                arabic: "ص ل ى",
                 transliteration: "s-l-y",
-                meanings: ["to pray", "bless"],
-                category: "worship",
-                type: "authentic_root",
-                difficulty: "basic",
-                examples: [
-                    {
-                        ayahArabic: "وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ",
-                        translation: "And establish prayer and give zakah",
-                        ref: "2:43"
-                    }
-                ]
+                meanings: "to pray, bless",
+                verse: {
+                    arabic: "وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ",
+                    translation: "And establish prayer and give zakah",
+                    ref: "2:43"
+                }
             }
         ];
         
         let currentIndex = 0;
-        let filteredCards = [...flashcards];
-        let showDetails = false;
-        let readWords = new Set();
-
-        function loadProgress() {
-            const saved = localStorage.getItem('quranFlashcardsProgress');
-            if (saved) {
-                const data = JSON.parse(saved);
-                readWords = new Set(data.readWords || []);
-                currentIndex = data.lastIndex || 0;
-                showDetails = data.showDetails || false;
-            }
-        }
-
-        function saveProgress() {
-            const data = {
-                readWords: Array.from(readWords),
-                lastIndex: currentIndex,
-                showDetails: showDetails
-            };
-            localStorage.setItem('quranFlashcardsProgress', JSON.stringify(data));
-        }
-
-        function displayCard() {
-            console.log('DisplayCard called, currentIndex:', currentIndex, 'filteredCards length:', filteredCards.length);
+        let showingDetails = false;
+        
+        function updateDisplay() {
+            console.log('Updating display, index:', currentIndex);
             
-            if (filteredCards.length === 0) {
-                document.getElementById('arabic').textContent = 'No results';
-                document.getElementById('transliteration').textContent = '';
-                document.getElementById('meanings').textContent = 'Try a different search';
-                return;
-            }
-            
-            const card = filteredCards[currentIndex];
-            console.log('Current card:', card);
-            const cardElement = document.getElementById('mainCard');
-            const readStatusElement = document.getElementById('readStatus');
-            
-            // Update read status
-            const isRead = readWords.has(card.id);
-            if (isRead) {
-                cardElement.classList.add('read');
-                readStatusElement.classList.add('read');
-                readStatusElement.textContent = '✓';
-            } else {
-                cardElement.classList.remove('read');
-                readStatusElement.classList.remove('read');
-                readStatusElement.textContent = '○';
-            }
+            const card = cards[currentIndex];
             
             // Update card content
-            document.getElementById('arabic').textContent = card.root;
+            document.getElementById('arabic').textContent = card.arabic;
             document.getElementById('transliteration').textContent = card.transliteration;
-            document.getElementById('meanings').textContent = card.meanings.join(', ');
-            document.getElementById('typeBadge').textContent = card.type.toUpperCase();
-            document.getElementById('categoryBadge').textContent = card.category.toUpperCase();
-            document.getElementById('difficultyBadge').textContent = card.difficulty.toUpperCase();
+            document.getElementById('meanings').textContent = card.meanings;
             
-            // Update counters
+            // Update counter
             document.getElementById('current').textContent = currentIndex + 1;
-            document.getElementById('total').textContent = filteredCards.length;
-            document.getElementById('readCount').textContent = readWords.size;
-            const progressPercent = Math.round((readWords.size / flashcards.length) * 100);
-            document.getElementById('progressPercent').textContent = progressPercent + '%';
-            document.getElementById('progressFill').style.width = progressPercent + '%';
+            document.getElementById('total').textContent = cards.length;
             
-            // Handle verses section
-            const versesSection = document.getElementById('versesSection');
-            const versesDiv = document.getElementById('verses');
-            const verseCountSpan = document.getElementById('verseCount');
+            // Update verse section
+            const verseSection = document.getElementById('verseSection');
+            const verseContent = document.getElementById('verseContent');
+            const toggleBtn = document.getElementById('toggleBtn');
             
-            if (showDetails && card.examples && card.examples.length > 0) {
-                versesDiv.innerHTML = card.examples
-                    .map(v => `
-                        <div class="verse">
-                            <div class="verse-arabic">${v.ayahArabic}</div>
-                            <div class="verse-translation">${v.translation}</div>
-                            <div class="verse-ref">[${v.ref}]</div>
-                        </div>
-                    `).join('');
-                verseCountSpan.textContent = `(${card.examples.length})`;
-                versesSection.style.display = 'block';
+            if (showingDetails) {
+                verseContent.innerHTML = `
+                    <div class="verse">
+                        <div class="verse-arabic">${card.verse.arabic}</div>
+                        <div class="verse-translation">${card.verse.translation}</div>
+                        <div class="verse-ref">[${card.verse.ref}]</div>
+                    </div>
+                `;
+                verseSection.style.display = 'block';
+                toggleBtn.textContent = 'Hide Details';
             } else {
-                versesSection.style.display = 'none';
-                verseCountSpan.textContent = '';
+                verseSection.style.display = 'none';
+                toggleBtn.textContent = 'Show Details';
             }
             
             // Update button states
-            document.getElementById('prevBtn').disabled = currentIndex === 0;
-            document.getElementById('nextBtn').disabled = currentIndex === filteredCards.length - 1;
-            document.getElementById('toggleBtn').textContent = showDetails ? 'Hide Details' : 'Show Details';
-            
-            saveProgress();
+            document.getElementById('prevBtn').disabled = (currentIndex === 0);
+            document.getElementById('nextBtn').disabled = (currentIndex === cards.length - 1);
         }
-
-        function toggleReadStatus() {
-            const card = filteredCards[currentIndex];
-            if (readWords.has(card.id)) {
-                readWords.delete(card.id);
-            } else {
-                readWords.add(card.id);
-            }
-            displayCard();
-        }
-
-        function toggleDetails() {
-            console.log('Toggle details clicked, current state:', showDetails);
-            showDetails = !showDetails;
-            console.log('New state:', showDetails);
-            displayCard();
-        }
-
+        
         function nextCard() {
-            console.log('Next card clicked, current index:', currentIndex, 'total cards:', filteredCards.length);
-            if (currentIndex < filteredCards.length - 1) {
+            console.log('Next clicked');
+            if (currentIndex < cards.length - 1) {
                 currentIndex++;
-                console.log('Moving to index:', currentIndex);
-                displayCard();
-            } else {
-                console.log('Already at last card');
+                updateDisplay();
             }
         }
-
-        function previousCard() {
-            console.log('Previous card clicked, current index:', currentIndex);
+        
+        function prevCard() {
+            console.log('Previous clicked');
             if (currentIndex > 0) {
                 currentIndex--;
-                console.log('Moving to index:', currentIndex);
-                displayCard();
-            } else {
-                console.log('Already at first card');
+                updateDisplay();
             }
         }
-
-        function shuffleCard() {
-            const newIndex = Math.floor(Math.random() * filteredCards.length);
-            console.log('Shuffle clicked, moving from', currentIndex, 'to', newIndex);
-            currentIndex = newIndex;
-            displayCard();
-        }
-
-        function searchCards() {
-            const query = document.getElementById('searchBox').value.toLowerCase().trim();
-            
-            if (query === '') {
-                filteredCards = [...flashcards];
-            } else {
-                filteredCards = flashcards.filter(card => 
-                    card.root.includes(query) ||
-                    card.transliteration.toLowerCase().includes(query) ||
-                    card.meanings.some(m => m.toLowerCase().includes(query)) ||
-                    card.category.toLowerCase().includes(query)
-                );
-            }
-            
-            currentIndex = 0;
-            displayCard();
-        }
-
-        // Event listeners
-        let searchTimeout;
-        document.getElementById('searchBox').addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(searchCards, 300);
-        });
-
-        document.getElementById('readStatus').addEventListener('click', toggleReadStatus);
-        document.getElementById('prevBtn').addEventListener('click', previousCard);
-        document.getElementById('nextBtn').addEventListener('click', nextCard);
-        document.getElementById('toggleBtn').addEventListener('click', toggleDetails);
-        document.getElementById('shuffleBtn').addEventListener('click', shuffleCard);
-
-        document.addEventListener('keydown', function(e) {
-            switch(e.key) {
-                case 'ArrowLeft': previousCard(); break;
-                case 'ArrowRight': nextCard(); break;
-                case ' ': e.preventDefault(); shuffleCard(); break;
-                case 'd': case 'D': toggleDetails(); break;
-                case 'm': case 'M': toggleReadStatus(); break;
-            }
-        });
-
-        // Initialize
-        loadProgress();
-        displayCard();
         
-        console.log('🌐 Quranic Arabic Flashcards loaded successfully!');
-        console.log('📊 Total entries:', flashcards.length);
-        console.log('⌨️ Shortcuts: D=Details, M=Mark read, Arrows=Navigate, Space=Random');
-        console.log('Current index:', currentIndex);
-        console.log('Filtered cards:', filteredCards.length);
+        function toggleDetails() {
+            console.log('Toggle details clicked');
+            showingDetails = !showingDetails;
+            updateDisplay();
+        }
         
-        // Test that buttons are properly connected
-        setTimeout(() => {
-            console.log('Testing button connections...');
-            const nextBtn = document.getElementById('nextBtn');
-            const toggleBtn = document.getElementById('toggleBtn');
-            console.log('Next button found:', !!nextBtn);
-            console.log('Toggle button found:', !!toggleBtn);
-        }, 100);
+        function randomCard() {
+            console.log('Random clicked');
+            currentIndex = Math.floor(Math.random() * cards.length);
+            updateDisplay();
+        }
+        
+        // Add event listeners when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, setting up events');
+            
+            document.getElementById('nextBtn').onclick = nextCard;
+            document.getElementById('prevBtn').onclick = prevCard;
+            document.getElementById('toggleBtn').onclick = toggleDetails;
+            document.getElementById('randomBtn').onclick = randomCard;
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                switch(e.key) {
+                    case 'ArrowRight':
+                        nextCard();
+                        break;
+                    case 'ArrowLeft':
+                        prevCard();
+                        break;
+                    case 'd':
+                    case 'D':
+                        toggleDetails();
+                        break;
+                    case 'r':
+                    case 'R':
+                        randomCard();
+                        break;
+                }
+            });
+            
+            // Initial display
+            updateDisplay();
+            
+            console.log('Setup complete!');
+        });
     </script>
 </body>
 </html>
