@@ -226,6 +226,105 @@
         }
         .read-status.read { background: #22c55e; color: white; }
         .card.read { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); }
+        .progress-stats { 
+            font-size: 0.9em; 
+            opacity: 0.8; 
+            text-align: center; 
+            margin: 10px 0; 
+        }
+        .progress-bar {
+            width: 100%; 
+            height: 6px; 
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px; 
+            margin: 10px 0; 
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; 
+            background: linear-gradient(90deg, #10b981, #22c55e);
+            border-radius: 3px; 
+            transition: width 0.5s ease;
+        }
+        .stats-panel {
+            background: rgba(255,255,255,0.05); 
+            padding: 15px; 
+            border-radius: 10px;
+            margin: 15px 0; 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px; 
+            text-align: center;
+        }
+        .stat-item { 
+            background: rgba(255,255,255,0.1); 
+            padding: 10px; 
+            border-radius: 8px; 
+        }
+        .stat-number { 
+            font-size: 1.5em; 
+            font-weight: bold; 
+            color: #fbbf24; 
+        }
+        .stat-label { 
+            font-size: 0.8em; 
+            opacity: 0.8; 
+            text-transform: uppercase; 
+        }
+        .read-status {
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            width: 20px; 
+            height: 20px;
+            border-radius: 50%; 
+            background: rgba(255,255,255,0.2); 
+            cursor: pointer;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 12px; 
+            transition: all 0.3s;
+        }
+        .read-status.read { 
+            background: #22c55e; 
+            color: white; 
+        }
+        .card.read { 
+            background: rgba(34, 197, 94, 0.1); 
+            border-color: rgba(34, 197, 94, 0.3); 
+        }
+        .notification-btn { 
+            background: #f59e0b; 
+        }
+        .notification-btn:hover { 
+            background: #d97706; 
+        }
+        .notification {
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            background: #059669;
+            color: white; 
+            padding: 15px 20px; 
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
+            z-index: 1000;
+            transform: translateX(400px); 
+            transition: transform 0.3s ease;
+        }
+        .notification.show { 
+            transform: translateX(0); 
+        }
+        .particle-word {
+            background: rgba(251, 191, 36, 0.2);
+            border: 2px solid #fbbf24;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+        }
+
 
     </style>
 </head>
@@ -238,6 +337,31 @@
                     <span id="current">1</span> of <span id="total">981</span>
                     <span class="verse-count">📖 <span id="verseTotal">0</span> verses</span>
                 </div>
+            <div class="progress-stats">
+                <span id="readCount">0</span> read • <span id="progressPercent">0%</span> complete
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+            </div>
+            
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalRoots">981</div>
+                    <div class="stat-label">Total Roots</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalDerivatives">0</div>
+                    <div class="stat-label">Derivatives</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalVerses">0</div>
+                    <div class="stat-label">Verses</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="readToday">0</div>
+                    <div class="stat-label">Read Today</div>
+                </div>
+            </div>
                 <div class="progress-stats">
                     <span id="readCount">0</span> read • <span id="progressPercent">0%</span> complete
                 </div>
@@ -28734,69 +28858,287 @@
         let filteredCards = [...flashcards];
         let showDetails = false;
 
-        function displayCard() {
+        // Progress tracking variables
+        let readWords = new Set();
+        let dailyNotifications = true;
+
+        // Load progress from localStorage
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem('quranFlashcardsProgress');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    readWords = new Set(data.readWords || []);
+                    currentIndex = Math.max(0, Math.min(data.lastIndex || 0, flashcards.length - 1));
+                    showDetails = data.showDetails || false;
+                    dailyNotifications = data.dailyNotifications !== false;
+                }
+            } catch (e) {
+                console.log('Progress loading error:', e);
+            }
+        }
+
+        // Save progress to localStorage
+        function saveProgress() {
+            try {
+                const data = {
+                    readWords: Array.from(readWords),
+                    lastIndex: currentIndex,
+                    showDetails: showDetails,
+                    dailyNotifications: dailyNotifications,
+                    lastVisit: new Date().toISOString(),
+                    lastVisitDate: new Date().toDateString()
+                };
+                localStorage.setItem('quranFlashcardsProgress', JSON.stringify(data));
+            } catch (e) {
+                console.log('Progress saving error:', e);
+            }
+        }
+
+        // Calculate and update statistics
+        function calculateStats() {
+            let totalDerivatives = 0;
+            let totalVerses = 0;
+            
+            flashcards.forEach(function(card) {
+                if (card.derivatives && Array.isArray(card.derivatives)) {
+                    totalDerivatives += card.derivatives.length;
+                }
+                if (card.examples && Array.isArray(card.examples)) {
+                    totalVerses += card.examples.length;
+                }
+            });
+            
+            const totalDerivativesEl = document.getElementById('totalDerivatives');
+            const totalVersesEl = document.getElementById('totalVerses');
+            const readTodayEl = document.getElementById('readToday');
+            
+            if (totalDerivativesEl) totalDerivativesEl.textContent = totalDerivatives;
+            if (totalVersesEl) totalVersesEl.textContent = totalVerses;
+            
+            // Calculate today's reading
+            const today = new Date().toDateString();
+            let todayReadCount = 0;
+            try {
+                const saved = localStorage.getItem('quranFlashcardsProgress');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    if (data.lastVisitDate === today) {
+                        todayReadCount = readWords.size;
+                    }
+                }
+            } catch (e) {
+                console.log('Today count error:', e);
+            }
+            
+            if (readTodayEl) readTodayEl.textContent = todayReadCount;
+        }
+
+        // Update progress display
+        function updateProgressDisplay() {
+            const readCountEl = document.getElementById('readCount');
+            const progressPercentEl = document.getElementById('progressPercent');
+            const progressFillEl = document.getElementById('progressFill');
+            
+            if (readCountEl) readCountEl.textContent = readWords.size;
+            
+            const progressPercent = flashcards.length > 0 ? Math.round((readWords.size / flashcards.length) * 100) : 0;
+            if (progressPercentEl) progressPercentEl.textContent = progressPercent + '%';
+            if (progressFillEl) progressFillEl.style.width = progressPercent + '%';
+        }
+
+        // Check if card is a particle (preposition/pronoun)
+        function isParticle(card) {
+            const type = (card.type || '').toLowerCase();
+            const category = (card.category || '').toLowerCase();
+            return type.includes('particle') || 
+                   type.includes('preposition') || 
+                   type.includes('pronoun') ||
+                   category.includes('particle') ||
+                   category.includes('preposition') ||
+                   category.includes('pronoun');
+        }
+
+        // Toggle read status
+        function toggleReadStatus() {
+            const card = filteredCards[currentIndex];
+            if (readWords.has(card.id)) {
+                readWords.delete(card.id);
+                showNotification('📖 Marked as unread');
+            } else {
+                readWords.add(card.id);
+                showNotification('✅ Marked as read');
+            }
+                        
+            // New feature event listeners
+            const readStatus = document.getElementById('readStatus');
+            const notificationBtn = document.getElementById('notificationBtn');
+            
+            if (readStatus) readStatus.addEventListener('click', toggleReadStatus);
+            if (notificationBtn) notificationBtn.addEventListener('click', toggleNotifications);
+            
+            // Enhanced keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                switch(e.key) {
+                    case 'ArrowLeft': previousCard(); break;
+                    case 'ArrowRight': nextCard(); break;
+                    case ' ': e.preventDefault(); shuffleCard(); break;
+                    case 'd': case 'D': toggleDetails(); break;
+                    case 'm': case 'M': toggleReadStatus(); break;
+                    case 'n': case 'N': toggleNotifications(); break;
+                }
+            });
+            
+            // Initialize progress features
+            loadProgress();
+            calculateStats();
+            
+            // Setup daily notification after delay
+            setTimeout(function() {
+                if (dailyNotifications) {
+                    setupDailyNotification();
+                }
+            }, 3000);
+            displayCard();
+            calculateStats();
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            if (notification) {
+                notification.textContent = message;
+                notification.classList.add('show');
+                setTimeout(function() {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Setup daily notification
+        function setupDailyNotification() {
+            if (dailyNotifications && 'Notification' in window) {
+                Notification.requestPermission().then(function(permission) {
+                    if (permission === 'granted') {
+                        const randomCard = flashcards[Math.floor(Math.random() * flashcards.length)];
+                        const meaning = Array.isArray(randomCard.meanings) ? randomCard.meanings[0] : randomCard.meanings;
+                        new Notification('🕌 Daily Quranic Root', {
+                            body: randomCard.root + ' (' + randomCard.transliteration + ') - ' + meaning,
+                            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🕌</text></svg>'
+                        });
+                        showNotification('🔔 Daily notification sent!');
+                    } else {
+                        showNotification('🔔 Please enable notifications in browser settings');
+                    }
+                });
+            }
+        }
+
+        // Toggle notifications
+        function toggleNotifications() {
+            dailyNotifications = !dailyNotifications;
+            if (dailyNotifications) {
+                setupDailyNotification();
+                showNotification('🔔 Daily notifications enabled');
+            } else {
+                showNotification('🔕 Daily notifications disabled');
+            }
+            saveProgress();
+        }
+
+        
+
+                function displayCard() {
             if (filteredCards.length === 0) {
                 document.getElementById('arabic').textContent = 'No results';
                 document.getElementById('transliteration').textContent = '';
                 document.getElementById('meanings').textContent = 'Try a different search';
-                document.getElementById('typeBadge').textContent = '';
-                document.getElementById('categoryBadge').textContent = '';
-                document.getElementById('difficultyBadge').textContent = '';
-                document.getElementById('derivativesSection').style.display = 'none';
-                document.getElementById('versesSection').style.display = 'none';
                 return;
             }
             
             const card = filteredCards[currentIndex];
+            const cardElement = document.querySelector('.card');
+            const readStatusElement = document.getElementById('readStatus');
             
-            // Basic info
+            // Update read status
+            const isRead = readWords.has(card.id);
+            if (cardElement) {
+                if (isRead) {
+                    cardElement.classList.add('read');
+                } else {
+                    cardElement.classList.remove('read');
+                }
+            }
+            
+            if (readStatusElement) {
+                if (isRead) {
+                    readStatusElement.classList.add('read');
+                    readStatusElement.textContent = '✓';
+                } else {
+                    readStatusElement.classList.remove('read');
+                    readStatusElement.textContent = '○';
+                }
+            }
+            
+            // Update card content
             document.getElementById('arabic').textContent = card.root || '';
             document.getElementById('transliteration').textContent = card.transliteration || '';
-            document.getElementById('meanings').textContent = (card.meanings || []).join(', ');
-            document.getElementById('typeBadge').textContent = (card.type || 'root').toUpperCase();
-            document.getElementById('categoryBadge').textContent = (card.category || '').replace(/_/g, ' ');
-            document.getElementById('difficultyBadge').textContent = (card.difficulty || '').toUpperCase();
+            document.getElementById('meanings').textContent = Array.isArray(card.meanings) ? card.meanings.join(', ') : card.meanings || '';
+            
+            // Update counters
             document.getElementById('current').textContent = currentIndex + 1;
             document.getElementById('total').textContent = filteredCards.length;
             
-            // Show/hide derivatives
+            // Update progress display
+            updateProgressDisplay();
+            
+            // Handle derivatives - special handling for particles
             const derivativesSection = document.getElementById('derivativesSection');
             const derivativesDiv = document.getElementById('derivatives');
-            if (showDetails && card.derivatives && card.derivatives.length > 0) {
-                derivativesDiv.innerHTML = card.derivatives
-                    .map(function(d) { return '<span class="derivative">' + d + '</span>'; })
-                    .join('');
-                derivativesSection.style.display = 'block';
-            } else {
+            
+            if (showDetails && derivativesSection && derivativesDiv) {
+                if (isParticle(card)) {
+                    // For particles, show the root as the full word
+                    derivativesDiv.innerHTML = '<div class="derivative particle-word">' + (card.root || '') + '</div>';
+                    derivativesSection.style.display = 'block';
+                } else if (card.derivatives && card.derivatives.length > 0) {
+                    // For regular roots, show derivatives
+                    derivativesDiv.innerHTML = card.derivatives.map(function(d) {
+                        return '<div class="derivative">' + d + '</div>';
+                    }).join('');
+                    derivativesSection.style.display = 'block';
+                } else {
+                    derivativesSection.style.display = 'none';
+                }
+            } else if (derivativesSection) {
                 derivativesSection.style.display = 'none';
             }
             
-            // Show/hide verses
+            // Handle verses - show for all types including particles
             const versesSection = document.getElementById('versesSection');
             const versesDiv = document.getElementById('verses');
-            const verseCountSpan = document.getElementById('verseCount');
             
-            if (showDetails && card.examples && card.examples.length > 0) {
-                versesDiv.innerHTML = card.examples
-                    .map(function(v) {
-                        return '<div class="verse">' +
-                            '<div class="verse-arabic">' + (v.ayahArabic || '') + '</div>' +
-                            '<div class="verse-translation">' + (v.translation || '') + '</div>' +
-                            '<div class="verse-ref">[' + (v.ref || '') + ']</div>' +
-                            '</div>';
-                    })
-                    .join('');
-                verseCountSpan.textContent = '(' + card.examples.length + ')';
+            if (showDetails && versesSection && versesDiv && card.examples && card.examples.length > 0) {
+                versesDiv.innerHTML = card.examples.map(function(v) {
+                    return '<div class="verse">' +
+                           '<div class="verse-arabic">' + (v.ayahArabic || '') + '</div>' +
+                           '<div class="verse-translation">' + (v.translation || '') + '</div>' +
+                           '<div class="verse-ref">[' + (v.ref || '') + ']</div>' +
+                           '</div>';
+                }).join('');
                 versesSection.style.display = 'block';
-            } else {
+            } else if (versesSection) {
                 versesSection.style.display = 'none';
-                verseCountSpan.textContent = '';
             }
             
-            // Update button states
-            document.getElementById('prevBtn').disabled = currentIndex === 0;
-            document.getElementById('nextBtn').disabled = currentIndex === filteredCards.length - 1;
-            document.getElementById('toggleBtn').textContent = showDetails ? 'Hide Details' : 'Show Details';
+            // Update button text
+            const toggleBtn = document.querySelector('.toggle-btn');
+            if (toggleBtn) {
+                toggleBtn.textContent = showDetails ? 'Hide Details' : 'Show Details';
+            }
+            
+            // Save progress
+            saveProgress();
         }
 
         function toggleDetails() {
