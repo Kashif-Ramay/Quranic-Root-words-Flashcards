@@ -190,21 +190,85 @@
             .verse-arabic { font-size: 16px; }
             .verse-translation { font-size: 13px; }
         }
+        .progress-info {
+            display: flex; justify-content: space-between; align-items: center;
+            margin: 10px 0; flex-wrap: wrap; gap: 10px;
+        }
+        .progress-stats { font-size: 0.9em; opacity: 0.8; }
+        .progress-bar {
+            width: 100%; height: 6px; background: rgba(255,255,255,0.2);
+            border-radius: 3px; margin: 10px 0; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, #10b981, #22c55e);
+            border-radius: 3px; transition: width 0.5s ease;
+        }
+        .stats-panel {
+            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px;
+            margin: 15px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px; text-align: center;
+        }
+        .stat-item { background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; }
+        .stat-number { font-size: 1.5em; font-weight: bold; color: #fbbf24; }
+        .stat-label { font-size: 0.8em; opacity: 0.8; text-transform: uppercase; }
+        .notification {
+            position: fixed; top: 20px; right: 20px; background: #059669;
+            color: white; padding: 15px 20px; border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000;
+            transform: translateX(400px); transition: transform 0.3s ease;
+        }
+        .notification.show { transform: translateX(0); }
+        .read-status {
+            position: absolute; top: 10px; right: 10px; width: 20px; height: 20px;
+            border-radius: 50%; background: rgba(255,255,255,0.2); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; transition: all 0.3s;
+        }
+        .read-status.read { background: #22c55e; color: white; }
+        .card.read { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); }
+
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🕌 Complete Quranic Arabic Flashcards</h1>
-            <div class="counter">
-                <span id="current">1</span> of <span id="total">981</span>
-                <span class="verse-count">📖 981 with verses</span>
+                        <div class="progress-info">
+                <div class="counter">
+                    <span id="current">1</span> of <span id="total">981</span>
+                    <span class="verse-count">📖 <span id="verseTotal">0</span> verses</span>
+                </div>
+                <div class="progress-stats">
+                    <span id="readCount">0</span> read • <span id="progressPercent">0%</span> complete
+                </div>
             </div>
-        </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalRoots">981</div>
+                    <div class="stat-label">Total Roots</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalDerivatives">0</div>
+                    <div class="stat-label">Derivatives</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="totalVerses">0</div>
+                    <div class="stat-label">Verses</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="readToday">0</div>
+                    <div class="stat-label">Read Today</div>
+                </div>
+            </div>
         
         <input type="text" class="search-box" id="searchBox" placeholder="Search roots, meanings, derivatives, or verses...">
         
         <div class="card">
+            <div class="read-status" id="readStatus" title="Mark as read">○</div>
             <div class="badges">
                 <span id="typeBadge" class="badge">ROOT</span>
                 <span id="categoryBadge" class="badge badge-soft">Category</span>
@@ -230,9 +294,12 @@
             <button onclick="previousCard()" id="prevBtn">← Previous</button>
             <button onclick="toggleDetails()" id="toggleBtn" class="toggle-btn">Show Details</button>
             <button onclick="shuffleCard()">🔀 Random</button>
+            <button id="notificationBtn" class="notification-btn">🔔 Daily Word</button>
             <button onclick="nextCard()" id="nextBtn">Next →</button>
         </div>
-    </div>
+        <div class="notification" id="notification"></div>
+
+</div>
 
     <script>
         // Complete embedded dataset with ALL data including verses
