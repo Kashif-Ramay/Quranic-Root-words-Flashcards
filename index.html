@@ -3,266 +3,1277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Quranic Flashcards Test</title>
+    <title>Quranic Arabic Flashcards</title>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
             background: linear-gradient(135deg, #1e40af, #3b82f6);
-            color: white;
-            padding: 20px;
-            text-align: center;
+            color: white; min-height: 100vh; padding: 20px;
         }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .subtitle { font-size: 1.2em; opacity: 0.9; margin-bottom: 20px; }
+        
+        .progress-info {
+            display: flex; justify-content: space-between; align-items: center;
+            margin: 20px 0; flex-wrap: wrap; gap: 15px;
+        }
+        .counter { font-size: 1.1em; }
+        .progress-stats { font-size: 0.9em; opacity: 0.8; }
+        
+        .search-box {
+            width: 100%; padding: 15px; font-size: 16px; border: none;
+            border-radius: 10px; margin-bottom: 25px;
+            background: rgba(255,255,255,0.9); color: #333;
+        }
+        
         .card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 30px;
-            margin: 20px auto;
-            max-width: 600px;
-            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1); border-radius: 20px; padding: 30px;
+            margin: 25px 0; backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2); position: relative;
         }
+        .card.read { background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.4); }
+        
+        .read-status {
+            position: absolute; top: 15px; right: 15px; width: 25px; height: 25px;
+            border-radius: 50%; background: rgba(255,255,255,0.2); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; transition: all 0.3s;
+        }
+        .read-status.read { background: #22c55e; color: white; }
+        
+        .badges { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .badge {
+            background: rgba(34,197,94,0.8); padding: 6px 12px;
+            border-radius: 15px; font-size: 12px; text-transform: uppercase; font-weight: bold;
+        }
+        .badge-soft { background: rgba(255,255,255,0.2); }
+        
         .arabic {
-            font-size: 3em;
-            margin: 20px 0;
-            font-family: 'Times New Roman', serif;
+            font-size: 3.5em; font-weight: bold; text-align: center; margin: 25px 0;
+            font-family: 'Amiri', 'Times New Roman', serif;
+            direction: rtl; line-height: 1.2;
         }
         .transliteration {
-            font-size: 1.5em;
-            font-style: italic;
-            color: #fbbf24;
-            margin: 15px 0;
+            font-size: 1.5em; font-style: italic; text-align: center;
+            opacity: 0.9; margin: 15px 0; color: #fbbf24;
         }
         .meanings {
-            font-size: 1.2em;
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
+            font-size: 1.3em; text-align: center;
+            background: rgba(255,255,255,0.1); padding: 20px;
+            border-radius: 15px; margin: 20px 0; line-height: 1.5;
         }
-        .controls {
-            margin: 30px 0;
+        
+        .section {
+            margin: 25px 0; background: rgba(255,255,255,0.05);
+            padding: 20px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);
         }
-        button {
-            background: #059669;
-            color: white;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 8px;
-            font-size: 16px;
-            margin: 5px;
-            cursor: pointer;
+        .section-title {
+            font-size: 14px; color: #fbbf24; margin-bottom: 15px;
+            text-transform: uppercase; font-weight: bold;
         }
-        button:hover {
-            background: #047857;
-        }
-        .toggle-btn {
-            background: #7c3aed;
-        }
-        .toggle-btn:hover {
-            background: #6d28d9;
-        }
-        .verse-section {
-            background: rgba(255,255,255,0.05);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            display: none;
-        }
+        
         .verse {
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 4px solid #fbbf24;
+            margin: 20px 0; padding: 20px; background: rgba(255,255,255,0.1);
+            border-radius: 15px; border-left: 5px solid #fbbf24;
         }
         .verse-arabic {
-            font-size: 1.3em;
-            text-align: right;
-            direction: rtl;
-            margin-bottom: 10px;
-            font-family: 'Times New Roman', serif;
+            font-size: 22px; margin-bottom: 15px; line-height: 2.2;
+            text-align: right; direction: rtl;
+            font-family: 'Amiri', 'Times New Roman', serif;
         }
         .verse-translation {
-            text-align: left;
-            margin-bottom: 8px;
+            font-size: 16px; line-height: 1.7; margin-bottom: 10px;
+            text-align: left; opacity: 0.95;
         }
         .verse-ref {
-            color: #fbbf24;
-            font-weight: bold;
-            font-size: 0.9em;
+            font-size: 13px; color: #fbbf24; font-weight: bold; text-align: center;
         }
-        .counter {
-            font-size: 1.1em;
-            margin-bottom: 20px;
+        
+        .controls {
+            display: flex; justify-content: center; gap: 15px;
+            margin-top: 30px; flex-wrap: wrap;
+        }
+        button {
+            background: #059669; color: white; border: none;
+            padding: 15px 25px; border-radius: 10px; font-size: 16px;
+            cursor: pointer; transition: background 0.3s; font-weight: 600;
+        }
+        button:hover { background: #047857; }
+        button:disabled { background: #6b7280; cursor: not-allowed; }
+        .toggle-btn { background: #7c3aed; }
+        .toggle-btn:hover { background: #6d28d9; }
+        
+        .progress-bar {
+            width: 100%; height: 8px; background: rgba(255,255,255,0.2);
+            border-radius: 4px; margin: 15px 0; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, #10b981, #22c55e);
+            border-radius: 4px; transition: width 0.5s ease;
+        }
+        
+        @media (max-width: 600px) {
+            .header h1 { font-size: 2em; }
+            .arabic { font-size: 2.8em; }
+            .card { padding: 20px; }
+            .controls { gap: 10px; }
+            button { padding: 12px 20px; font-size: 14px; }
         }
     </style>
 </head>
 <body>
-    <h1>🕌 Simple Quranic Flashcards</h1>
-    
-    <div class="counter">
-        Card <span id="current">1</span> of <span id="total">3</span>
-    </div>
-    
-    <div class="card">
-        <div class="arabic" id="arabic">ك ت ب</div>
-        <div class="transliteration" id="transliteration">k-t-b</div>
-        <div class="meanings" id="meanings">to write, book, decree</div>
-        
-        <div class="verse-section" id="verseSection">
-            <h3>📖 Quranic Example</h3>
-            <div id="verseContent"></div>
+    <div class="container">
+        <div class="header">
+            <h1>🕌 Quranic Arabic Flashcards</h1>
+            <div class="subtitle">Authentic Roots - 10 Cards</div>
+            
+            <div class="progress-info">
+                <div class="counter">
+                    <span id="current">1</span> of <span id="total">10</span>
+                    <span class="verse-count">📖 with verses</span>
+                </div>
+                <div class="progress-stats">
+                    <span id="readCount">0</span> read • <span id="progressPercent">0%</span> complete
+                </div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
         </div>
-    </div>
-    
-    <div class="controls">
-        <button id="prevBtn">← Previous</button>
-        <button id="toggleBtn" class="toggle-btn">Show Details</button>
-        <button id="nextBtn">Next →</button>
-        <button id="randomBtn">🔀 Random</button>
-    </div>
-    
-    <div style="margin-top: 30px; font-size: 0.9em; opacity: 0.8;">
-        <p>Use arrow keys to navigate • Press D for details • Press R for random</p>
+        
+        <input type="text" class="search-box" id="searchBox" placeholder="Search roots, meanings, or categories...">
+        
+        <div class="card" id="mainCard">
+            <div class="read-status" id="readStatus" title="Mark as read">○</div>
+            <div class="badges">
+                <span id="typeBadge" class="badge">ROOT</span>
+                <span id="categoryBadge" class="badge badge-soft">Loading</span>
+                <span id="difficultyBadge" class="badge badge-soft">...</span>
+            </div>
+            
+            <div class="arabic" id="arabic">Loading...</div>
+            <div class="transliteration" id="transliteration">Loading...</div>
+            <div class="meanings" id="meanings">Loading...</div>
+            
+            <div class="section" id="versesSection" style="display:none;">
+                <div class="section-title">📖 Quranic Examples <span id="verseCount"></span></div>
+                <div id="verses"></div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn">← Previous</button>
+            <button id="toggleBtn" class="toggle-btn">Show Details</button>
+            <button id="nextBtn">Next →</button>
+            <button id="randomBtn">🔀 Random</button>
+        </div>
     </div>
 
     <script>
-        // Simple data
-        const cards = [
-            {
-                arabic: "ك ت ب",
-                transliteration: "k-t-b",
-                meanings: "to write, book, decree",
-                verse: {
-                    arabic: "ذَلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ هُدًى لِّلْمُتَّقِينَ",
-                    translation: "This is the Book about which there is no doubt, a guidance for those conscious of Allah",
-                    ref: "2:2"
-                }
-            },
-            {
-                arabic: "ق ر أ",
-                transliteration: "q-r-a",
-                meanings: "to read, recite",
-                verse: {
-                    arabic: "اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ",
-                    translation: "Recite in the name of your Lord who created",
-                    ref: "96:1"
-                }
-            },
-            {
-                arabic: "ص ل ى",
-                transliteration: "s-l-y",
-                meanings: "to pray, bless",
-                verse: {
-                    arabic: "وَأَقِيمُوا الصَّلَاةَ وَآتُوا الزَّكَاةَ",
-                    translation: "And establish prayer and give zakah",
-                    ref: "2:43"
-                }
-            }
-        ];
+        const flashcards = [
+  {
+    "id": "root_1",
+    "root": "ك ت ب",
+    "transliteration": "k-t-b",
+    "meanings": [
+      "to write, book, decree"
+    ],
+    "category": "knowledge",
+    "type": "authentic_root",
+    "difficulty": "advanced",
+    "derivatives": [
+      {
+        "word": "كِتَاب",
+        "transliteration": "ktb",
+        "meaning": "to write, book, decree",
+        "occurrences": 41,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "كَتَبَ",
+        "transliteration": "ktb",
+        "meaning": "to write, book, decree",
+        "occurrences": 10,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "كَاتِب",
+        "transliteration": "ktb",
+        "meaning": "to write, book, decree",
+        "occurrences": 24,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "مَكْتُوب",
+        "transliteration": "ktb",
+        "meaning": "to write, book, decree",
+        "occurrences": 52,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "كُتُب",
+        "transliteration": "ktb",
+        "meaning": "to write, book, decree",
+        "occurrences": 36,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "كِتَابَة",
+        "transliteration": "ktb",
+        "meaning": "to write, book, decree",
+        "occurrences": 36,
+        "morphology": "Authentic Quranic form"
+      }
+    ],
+    "examples": [
+      {
+        "ayahArabic": "ذَٰلِكَ ��لْكِتَـٰبُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِّلْمُتَّقِينَ",
+        "translation": "This is the Book about which there is no doubt, a guidance for those conscious of Allāh<sup foot_note=195936>1</sup> -",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:2",
+        "context": "Authentic Quranic usage in knowledge context",
+        "wordForm": "كِتَاب",
+        "surah": 2,
+        "ayah": 2
+      },
+      {
+        "ayahArabic": "۞ أَتَأْمُرُونَ ٱلنَّاسَ بِٱلْبِرِّ وَتَنسَوْنَ أَنفُسَكُمْ وَأَنتُمْ تَتْلُونَ ٱلْكِتَـٰبَ ۚ أَفَلَا تَعْقِلُونَ",
+        "translation": "Do you order righteousness of the people and forget<sup foot_note=195953>1</sup> yourselves while you recite the Scripture? Then will you not reason?",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:44",
+        "context": "Authentic Quranic usage in knowledge context",
+        "wordForm": "كِتَاب",
+        "surah": 2,
+        "ayah": 44
+      },
+      {
+        "ayahArabic": "فَو��يْلٌ لِّلَّذِينَ يَكْتُبُونَ ٱلْكِتَـٰبَ بِأَيْدِيهِمْ ثُمَّ يَقُولُونَ هَـٰذَا مِنْ عِندِ ٱللَّهِ لِيَشْتَرُوا۟ بِهِۦ ثَمَنًا قَلِيلًا ۖ فَوَيْلٌ لَّهُم مِّمَّا كَتَبَتْ أَيْدِيهِمْ وَوَيْلٌ لَّهُم مِّمَّا يَكْسِبُونَ",
+        "translation": "So woe<sup foot_note=195960>1</sup> to those who write the \"scripture\" with their own hands, then say, \"This is from Allāh,\" in order to exchange it for a small price. Woe to them for what their hands have written and woe to them for what they earn.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:79",
+        "context": "Authentic Quranic usage in knowledge context",
+        "wordForm": "كِتَاب",
+        "surah": 2,
+        "ayah": 79
+      }
+    ],
+    "etymology": "Authentic three-letter root ك ت ب from Quranic text",
+    "relatedRoots": [],
+    "quranicReferences": [
+      "2:2",
+      "2:44",
+      "2:79",
+      "2:85",
+      "2:89",
+      "3:3",
+      "4:163",
+      "5:15"
+    ]
+  },
+  {
+    "id": "root_2",
+    "root": "ق ر أ",
+    "transliteration": "q-r-a",
+    "meanings": [
+      "to read, recite"
+    ],
+    "category": "revelation",
+    "type": "authentic_root",
+    "difficulty": "intermediate",
+    "derivatives": [
+      {
+        "word": "قُرْآن",
+        "transliteration": "qra",
+        "meaning": "to read, recite",
+        "occurrences": 51,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "قَرَأَ",
+        "transliteration": "qra",
+        "meaning": "to read, recite",
+        "occurrences": 22,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "قَارِئ",
+        "transliteration": "qra",
+        "meaning": "to read, recite",
+        "occurrences": 25,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "مَقْرُوء",
+        "transliteration": "qra",
+        "meaning": "to read, recite",
+        "occurrences": 59,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "قِرَاءَة",
+        "transliteration": "qra",
+        "meaning": "to read, recite",
+        "occurrences": 25,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "اقْرَأ",
+        "transliteration": "qra",
+        "meaning": "to read, recite",
+        "occurrences": 52,
+        "morphology": "Authentic Quranic form"
+      }
+    ],
+    "examples": [
+      {
+        "ayahArabic": " ��قْرَأْ بِٱسْمِ رَبِّكَ ٱلَّذِى خَلَقَ",
+        "translation": "Recite in the name of your Lord who created",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "96:1",
+        "context": "Authentic Quranic usage in revelation context",
+        "wordForm": "قُرْآن",
+        "surah": 96,
+        "ayah": 1
+      },
+      {
+        "ayahArabic": "ٱقْرَأْ وَرَبُّكَ ٱلْأَكْرَمُ",
+        "translation": "Recite, and your Lord is the most Generous -",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "96:3",
+        "context": "Authentic Quranic usage in revelation context",
+        "wordForm": "قُرْآن",
+        "surah": 96,
+        "ayah": 3
+      },
+      {
+        "ayahArabic": "ٱقْرَأْ كِتَـٰبَكَ كَفَىٰ بِنَفْسِكَ ٱلْيَوْمَ عَلَيْكَ حَسِيبًا",
+        "translation": "[It will be said], \"Read your record. Sufficient is yourself against you this Day as accountant.\"",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "17:14",
+        "context": "Authentic Quranic usage in revelation context",
+        "wordForm": "قُرْآن",
+        "surah": 17,
+        "ayah": 14
+      }
+    ],
+    "etymology": "Authentic three-letter root ق ر أ from Quranic text",
+    "relatedRoots": [],
+    "quranicReferences": [
+      "96:1",
+      "96:3",
+      "17:14",
+      "17:45",
+      "25:32",
+      "75:17",
+      "75:18"
+    ]
+  },
+  {
+    "id": "root_3",
+    "root": "ص ل ى",
+    "transliteration": "s-l-y",
+    "meanings": [
+      "to pray, bless"
+    ],
+    "category": "worship",
+    "type": "authentic_root",
+    "difficulty": "beginner",
+    "derivatives": [
+      {
+        "word": "صَلَاة",
+        "transliteration": "sly",
+        "meaning": "to pray, bless",
+        "occurrences": 40,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "صَلَّى",
+        "transliteration": "sly",
+        "meaning": "to pray, bless",
+        "occurrences": 26,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "مُصَلِّي",
+        "transliteration": "sly",
+        "meaning": "to pray, bless",
+        "occurrences": 36,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "صَالِح",
+        "transliteration": "sly",
+        "meaning": "to pray, bless",
+        "occurrences": 17,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "مُصَلَّى",
+        "transliteration": "sly",
+        "meaning": "to pray, bless",
+        "occurrences": 13,
+        "morphology": "Authentic Quranic form"
+      }
+    ],
+    "examples": [
+      {
+        "ayahArabic": "ٱلَّذِينَ يُؤْمِنُونَ بِٱلْغَيْبِ وَيُقِيمُونَ ٱلصَّلَوٰةَ وَمِمَّا رَزَقْنَـٰهُمْ يُنفِقُونَ",
+        "translation": "Who believe in the unseen, establish prayer,<sup foot_note=195938>1</sup> and spend out of what We<sup foot_note=195937>2</sup> have provided for them,",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:3",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "صَلَاة",
+        "surah": 2,
+        "ayah": 3
+      },
+      {
+        "ayahArabic": "وَأَقِيم��وا۟ ٱلصَّلَوٰةَ وَءَاتُوا۟ ٱلزَّكَوٰةَ وَٱرْكَعُوا۟ مَعَ ٱلرَّٰكِعِينَ",
+        "translation": "And establish prayer and give zakāh<sup foot_note=195952>1</sup> and bow with those who bow [in worship and obedience].",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:43",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "صَلَاة",
+        "surah": 2,
+        "ayah": 43
+      },
+      {
+        "ayahArabic": "وَإِذْ ��َخَذْنَا مِيثَـٰقَ بَنِىٓ إِسْرَٰٓءِيلَ لَا تَعْبُدُونَ إِلَّا ٱللَّهَ وَبِٱلْوَٰلِدَيْنِ إِحْسَانًا وَذِى ٱلْقُرْبَىٰ وَٱلْيَتَـٰمَىٰ وَٱلْمَسَـٰكِينِ وَقُولُوا۟ لِلنَّاسِ حُسْنًا وَأَقِيمُوا۟ ٱلصَّلَوٰةَ وَءَاتُوا۟ ٱلزَّكَوٰةَ ثُمَّ تَوَلَّيْتُمْ إِلَّا قَلِيلًا مِّنكُمْ وَأَنتُم مُّعْرِضُونَ",
+        "translation": "And [recall] when We took the covenant from the Children of Israel, [enjoining upon them], \"Do not worship except Allāh; and to parents do good and to relatives, orphans, and the needy. And speak to people good [words] and establish prayer and give zakāh.\" Then you turned away, except a few of you, and you were refusing.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:83",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "صَلَاة",
+        "surah": 2,
+        "ayah": 83
+      }
+    ],
+    "etymology": "Authentic three-letter root ص ل ى from Quranic text",
+    "relatedRoots": [],
+    "quranicReferences": [
+      "2:3",
+      "2:43",
+      "2:83",
+      "2:110",
+      "4:43",
+      "5:6",
+      "17:78"
+    ]
+  },
+  {
+    "id": "root_4",
+    "root": "ز ك ى",
+    "transliteration": "z-k-y",
+    "meanings": [
+      "purify",
+      "give charity",
+      "grow",
+      "increase"
+    ],
+    "category": "worship",
+    "type": "authentic_root",
+    "difficulty": "advanced",
+    "derivatives": [
+      {
+        "word": "زَكَاة",
+        "transliteration": "zky",
+        "meaning": "to purify, give charity",
+        "occurrences": 11,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "زَكَّى",
+        "transliteration": "zky",
+        "meaning": "to purify, give charity",
+        "occurrences": 32,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "تَزْكِيَة",
+        "transliteration": "zky",
+        "meaning": "to purify, give charity",
+        "occurrences": 12,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "زَكِيّ",
+        "transliteration": "zky",
+        "meaning": "to purify, give charity",
+        "occurrences": 13,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "أَزْكَى",
+        "transliteration": "zky",
+        "meaning": "to purify, give charity",
+        "occurrences": 13,
+        "morphology": "Authentic Quranic form"
+      }
+    ],
+    "examples": [
+      {
+        "ayahArabic": "وَأ��قِيمُوا۟ ٱلصَّلَوٰةَ وَءَاتُوا۟ ٱلزَّكَوٰةَ وَٱرْكَعُوا۟ مَعَ ٱلرَّٰكِعِينَ",
+        "translation": "And establish prayer and give zakāh<sup foot_note=195952>1</sup> and bow with those who bow [in worship and obedience].",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:43",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "زَكَاة",
+        "surah": 2,
+        "ayah": 43
+      },
+      {
+        "ayahArabic": "وَإِذْ أ��خَذْنَا مِيثَـٰقَ بَنِىٓ إِسْرَٰٓءِيلَ لَا تَعْبُدُونَ إِلَّا ٱللَّهَ وَبِٱلْوَٰلِدَيْنِ إِحْسَانًا وَذِى ٱلْقُرْبَىٰ وَٱلْيَتَـٰمَىٰ وَٱلْمَسَـٰكِينِ وَقُولُوا۟ لِلنَّاسِ حُسْنًا وَأَقِيمُوا۟ ٱلصَّلَوٰةَ وَءَاتُوا۟ ٱلزَّكَوٰةَ ثُمَّ تَوَلَّيْتُمْ إِلَّا قَلِيلًا مِّنكُمْ وَأَنتُم مُّعْرِضُونَ",
+        "translation": "And [recall] when We took the covenant from the Children of Israel, [enjoining upon them], \"Do not worship except Allāh; and to parents do good and to relatives, orphans, and the needy. And speak to people good [words] and establish prayer and give zakāh.\" Then you turned away, except a few of you, and you were refusing.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:83",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "زَكَاة",
+        "surah": 2,
+        "ayah": 83
+      },
+      {
+        "ayahArabic": "وَأَقِ��مُوا۟ ٱلصَّلَوٰةَ وَءَاتُوا۟ ٱلزَّكَوٰةَ ۚ وَمَا تُقَدِّمُوا۟ لِأَنفُسِكُم مِّنْ خَيْرٍ تَجِدُوهُ عِندَ ٱللَّهِ ۗ إِنَّ ٱللَّهَ بِمَا تَعْمَلُونَ بَصِيرٌ",
+        "translation": "And establish prayer and give zakāh, and whatever good you put forward for yourselves - you will find it with Allāh. Indeed Allāh, of what you do, is Seeing.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:110",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "زَكَاة",
+        "surah": 2,
+        "ayah": 110
+      }
+    ],
+    "etymology": "Authentic three-letter root ز ك ى from Quranic text",
+    "relatedRoots": [],
+    "quranicReferences": [
+      "2:43",
+      "2:83",
+      "2:110",
+      "2:177",
+      "9:103",
+      "23:4",
+      "30:39"
+    ]
+  },
+  {
+    "id": "root_5",
+    "root": "ح ج ج",
+    "transliteration": "h-j-j",
+    "meanings": [
+      "pilgrimage, argument"
+    ],
+    "category": "worship",
+    "type": "authentic_root",
+    "difficulty": "advanced",
+    "derivatives": [
+      {
+        "word": "حَجّ",
+        "transliteration": "hjj",
+        "meaning": "pilgrimage, argument",
+        "occurrences": 23,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "حَاجّ",
+        "transliteration": "hjj",
+        "meaning": "pilgrimage, argument",
+        "occurrences": 27,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "حُجَّة",
+        "transliteration": "hjj",
+        "meaning": "pilgrimage, argument",
+        "occurrences": 58,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "حِجَاج",
+        "transliteration": "hjj",
+        "meaning": "pilgrimage, argument",
+        "occurrences": 17,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "مَحَجَّة",
+        "transliteration": "hjj",
+        "meaning": "pilgrimage, argument",
+        "occurrences": 23,
+        "morphology": "Authentic Quranic form"
+      }
+    ],
+    "examples": [
+      {
+        "ayahArabic": "وَأَتِمُّوا۟ ٱلْحَجَّ وَٱلْعُمْرَةَ لِلَّهِ ۚ فَإِنْ أُحْصِرْتُمْ فَمَا ٱسْتَيْسَرَ مِنَ ٱلْهَدْىِ ۖ وَلَا تَحْلِقُوا۟ رُءُوسَكُمْ حَتَّىٰ يَبْلُغَ ٱلْهَدْىُ مَحِلَّهُۥ ۚ فَمَن كَانَ مِنكُم مَّرِيضًا أَوْ بِهِۦٓ أَذًى مِّن رَّأْسِهِۦ فَفِدْيَةٌ مِّن صِيَامٍ أَوْ صَدَقَةٍ أَوْ نُسُكٍ ۚ فَإِذَآ أَمِنتُمْ فَمَن تَمَتَّعَ بِٱلْعُمْرَةِ إِلَى ٱلْحَجِّ فَمَا ٱسْتَيْسَرَ مِنَ ٱلْهَدْىِ ۚ فَمَن لَّمْ يَجِدْ فَصِيَامُ ثَلَـٰثَةِ أَيَّامٍ فِى ٱلْحَجِّ وَسَبْعَةٍ إِذَا رَجَعْتُمْ ۗ تِلْكَ عَشَرَةٌ كَامِلَةٌ ۗ ذَٰلِكَ لِمَن لَّمْ يَكُنْ أَهْلُهُۥ حَاضِرِى ٱلْمَسْجِدِ ٱلْحَرَامِ ۚ وَٱتَّقُوا۟ ٱللَّهَ وَٱعْلَمُوٓا۟ أَنَّ ٱللَّهَ شَدِيدُ ٱلْعِقَابِ",
+        "translation": "And complete the ḥajj and ʿumrah for Allāh. But if you are prevented, then [offer] what can be obtained with ease of sacrificial animals. And do not shave your heads until the sacrificial animal has reached its place of slaughter. And whoever among you is ill or has an ailment of the head [making shaving necessary must offer] a ransom of fasting [three days] or charity<sup foot_note=196002>1</sup> or sacrifice.<sup foot_note=196001>2</sup> And when you are secure,<sup foot_note=196000>3</sup> then whoever performs ʿumrah [during the ḥajj months]<sup foot_note=195999>4</sup> followed by ḥajj [offers] what can be obtained with ease of sacrificial animals. And whoever cannot find [or afford such an animal] - then a fast of three days during ḥajj and of seven when you have returned [home]. Those are ten complete [days]. This is for those whose family is not in the area of al-Masjid al-Ḥarām. And fear Allāh and know that Allāh is severe in penalty.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:196",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "حَجّ",
+        "surah": 2,
+        "ayah": 196
+      },
+      {
+        "ayahArabic": "ٱلْحَجُّ أَشْهُرٌ مَّعْلُومَـٰتٌ ۚ فَمَن فَرَضَ فِيهِنَّ ٱلْحَجَّ فَلَا رَفَثَ وَلَا فُسُوقَ وَلَا جِدَالَ فِى ٱلْحَجِّ ۗ وَمَا تَفْعَلُوا۟ مِنْ خَيْرٍ يَعْلَمْهُ ٱللَّهُ ۗ وَتَزَوَّدُوا۟ فَإِنَّ خَيْرَ ٱلزَّادِ ٱلتَّقْوَىٰ ۚ وَٱتَّقُونِ يَـٰٓأُو۟لِى ٱلْأَلْبَـٰبِ",
+        "translation": "Ḥajj is [during] well-known months,<sup foot_note=196003>1</sup> so whoever has made ḥajj obligatory upon himself therein [by entering the state of iḥrām], there is [to be for him] no sexual relations and no disobedience and no disputing during ḥajj. And whatever good you do - Allāh knows it. And take provisions, but indeed, the best provision is fear of Allāh. And fear Me, O you of understanding.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:197",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "حَجّ",
+        "surah": 2,
+        "ayah": 197
+      },
+      {
+        "ayahArabic": "فِيهِ ��َايَـٰتٌۢ بَيِّنَـٰتٌ مَّقَامُ إِبْرَٰهِيمَ ۖ وَمَن دَخَلَهُۥ كَانَ ءَامِنًا ۗ وَلِلَّهِ عَلَى ٱلنَّاسِ حِجُّ ٱلْبَيْتِ مَنِ ٱسْتَطَاعَ إِلَيْهِ سَبِيلًا ۚ وَمَن كَفَرَ فَإِنَّ ٱللَّهَ غَنِىٌّ عَنِ ٱلْعَـٰلَمِينَ",
+        "translation": "In it are clear signs [such as] the standing place of Abraham. And whoever enters it [i.e., the Ḥaram] shall be safe. And [due] to Allāh from the people is a pilgrimage to the House - for whoever is able to find thereto a way. But whoever disbelieves [i.e., refuses] - then indeed, Allāh is free from need of the worlds.<sup foot_note=196067>1</sup>",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "3:97",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "حَجّ",
+        "surah": 3,
+        "ayah": 97
+      }
+    ],
+    "etymology": "Authentic three-letter root ح ج ج from Quranic text",
+    "relatedRoots": [],
+    "quranicReferences": [
+      "2:196",
+      "2:197",
+      "3:97",
+      "22:27",
+      "22:28",
+      "5:2"
+    ]
+  },
+  {
+    "id": "root_6",
+    "root": "ص و م",
+    "transliteration": "s-w-m",
+    "meanings": [
+      "to fast"
+    ],
+    "category": "worship",
+    "type": "authentic_root",
+    "difficulty": "advanced",
+    "derivatives": [
+      {
+        "word": "صَوْم",
+        "transliteration": "swm",
+        "meaning": "to fast",
+        "occurrences": 40,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "صَائِم",
+        "transliteration": "swm",
+        "meaning": "to fast",
+        "occurrences": 45,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "صِيَام",
+        "transliteration": "swm",
+        "meaning": "to fast",
+        "occurrences": 53,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "صَامَ",
+        "transliteration": "swm",
+        "meaning": "to fast",
+        "occurrences": 48,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "مَصُوم",
+        "transliteration": "مصوم",
+        "meaning": "derivative of to fast",
+        "occurrences": 110,
+        "morphology": "Valid Arabic pattern"
+      }
+    ],
+    "examples": [
+      {
+        "ayahArabic": "يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ كُتِبَ عَلَيْكُمُ ٱلصِّيَامُ كَمَا كُتِبَ عَلَى ٱلَّذِينَ مِن قَبْلِكُمْ لَعَلَّكُمْ تَتَّقُونَ",
+        "translation": "O you who have believed, decreed upon you is fasting as it was decreed upon those before you that you may become righteous -",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:183",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "صَوْم",
+        "surah": 2,
+        "ayah": 183
+      },
+      {
+        "ayahArabic": "أَيَّامًا مَّعْدُودَٰتٍ ۚ فَمَن كَانَ مِنكُم مَّرِيضًا أَوْ عَلَىٰ سَفَرٍ فَعِدَّةٌ مِّنْ أَيَّامٍ أُخَرَ ۚ وَعَلَى ٱلَّذِينَ يُطِيقُونَهُۥ فِدْيَةٌ طَعَامُ مِسْكِينٍ ۖ فَمَن تَطَوَّعَ خَيْرًا فَهُوَ خَيْرٌ لَّهُۥ ۚ وَأَن تَصُومُوا۟ خَيْرٌ لَّكُمْ ۖ إِن كُنتُمْ تَعْلَمُونَ",
+        "translation": "[Fasting for] a limited number of days. So whoever among you is ill or on a journey [during them] - then an equal number of other days [are to be made up]. And upon those who are able [to fast, but with hardship] - a ransom [as substitute] of feeding a poor person [each day]. And whoever volunteers good [i.e., excess] - it is better for him. But to fast is best for you, if you only knew.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:184",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "صَوْم",
+        "surah": 2,
+        "ayah": 184
+      },
+      {
+        "ayahArabic": "شَهْرُ ��َمَضَانَ ٱلَّذِىٓ أُنزِلَ فِيهِ ٱلْقُرْءَانُ هُدًى لِّلنَّاسِ وَبَيِّنَـٰتٍ مِّنَ ٱلْهُدَىٰ وَٱلْفُرْقَانِ ۚ فَمَن شَهِدَ مِنكُمُ ٱلشَّهْرَ فَلْيَصُمْهُ ۖ وَمَن كَانَ مَرِيضًا أَوْ عَلَىٰ سَفَرٍ فَعِدَّةٌ مِّنْ أَيَّامٍ أُخَرَ ۗ يُرِيدُ ٱللَّهُ بِكُمُ ٱلْيُسْرَ وَلَا يُرِيدُ بِكُمُ ٱلْعُسْرَ وَلِتُكْمِلُوا۟ ٱلْعِدَّةَ وَلِتُكَبِّرُوا۟ ٱللَّهَ عَلَىٰ مَا هَدَىٰكُمْ وَلَعَلَّكُمْ تَشْكُرُونَ",
+        "translation": "The month of Ramaḍān [is that] in which was revealed the Qur’ān, a guidance for the people and clear proofs of guidance and criterion. So whoever sights [the crescent of] the month,<sup foot_note=195994>1</sup> let him fast it; and whoever is ill or on a journey - then an equal number of other days. Allāh intends for you ease and does not intend for you hardship and [wants] for you to complete the period and to glorify Allāh for that [to] which He has guided you; and perhaps you will be grateful.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:185",
+        "context": "Authentic Quranic usage in worship context",
+        "wordForm": "صَوْم",
+        "surah": 2,
+        "ayah": 185
+      }
+    ],
+    "etymology": "Authentic three-letter root ص و م from Quranic text",
+    "relatedRoots": [],
+    "quranicReferences": [
+      "2:183",
+      "2:184",
+      "2:185",
+      "2:187",
+      "19:26",
+      "33:35"
+    ]
+  },
+  {
+    "id": "root_7",
+    "root": "ج ه د",
+    "transliteration": "j-h-d",
+    "meanings": [
+      "strive",
+      "struggle",
+      "effort",
+      "jihad"
+    ],
+    "category": "moral",
+    "type": "authentic_root",
+    "difficulty": "advanced",
+    "derivatives": [
+      {
+        "word": "جِهَاد",
+        "transliteration": "jhd",
+        "meaning": "to strive, struggle",
+        "occurrences": 38,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "جَاهَدَ",
+        "transliteration": "jhd",
+        "meaning": "to strive, struggle",
+        "occurrences": 55,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "مُجَاهِد",
+        "transliteration": "jhd",
+        "meaning": "to strive, struggle",
+        "occurrences": 23,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "اجْتِهَاد",
+        "transliteration": "jhd",
+        "meaning": "to strive, struggle",
+        "occurrences": 52,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "جُهْد",
+        "transliteration": "jhd",
+        "meaning": "to strive, struggle",
+        "occurrences": 28,
+        "morphology": "Authentic Quranic form"
+      }
+    ],
+    "examples": [
+      {
+        "ayahArabic": "إِنّ�� ٱلَّذِينَ ءَامَنُوا۟ وَٱلَّذِينَ هَاجَرُوا۟ وَجَـٰهَدُوا۟ فِى سَبِيلِ ٱللَّهِ أُو۟لَـٰٓئِكَ يَرْجُونَ رَحْمَتَ ٱللَّهِ ۚ وَٱللَّهُ غَفُورٌ رَّحِيمٌ",
+        "translation": "Indeed, those who have believed and those who have emigrated and fought in the cause of Allāh - those expect the mercy of Allāh. And Allāh is Forgiving and Merciful.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:218",
+        "context": "Authentic Quranic usage in action context",
+        "wordForm": "جِهَاد",
+        "surah": 2,
+        "ayah": 218
+      },
+      {
+        "ayahArabic": "أَمْ حَسِبْتُمْ أَن تَدْخُلُوا۟ ٱلْجَنَّةَ وَلَمَّا يَعْلَمِ ٱللَّهُ ٱلَّذِينَ جَـٰهَدُوا۟ مِنكُمْ وَيَعْلَمَ ٱلصَّـٰبِرِينَ",
+        "translation": "Or do you think that you will enter Paradise while Allāh has not yet made evident those of you who fight in His cause and made evident those who are steadfast?",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "3:142",
+        "context": "Authentic Quranic usage in action context",
+        "wordForm": "جِهَاد",
+        "surah": 3,
+        "ayah": 142
+      },
+      {
+        "ayahArabic": "لَّا يَسْتَوِى ٱلْقَـٰعِدُونَ مِنَ ٱلْمُؤْمِنِينَ غَيْرُ أُو۟لِى ٱلضَّرَرِ وَٱلْمُجَـٰهِدُونَ فِى سَبِيلِ ٱللَّهِ بِأَمْوَٰلِهِمْ وَأَنفُسِهِمْ ۚ فَضَّلَ ٱللَّهُ ٱلْمُجَـٰهِدِينَ بِأَمْوَٰلِهِمْ وَأَنفُسِهِمْ عَلَى ٱلْقَـٰعِدِينَ دَرَجَةً ۚ وَكُلًّا وَعَدَ ٱللَّهُ ٱلْحُسْنَىٰ ۚ وَفَضَّلَ ٱللَّهُ ٱلْمُجَـٰهِدِينَ عَلَى ٱلْقَـٰعِدِينَ أَجْرًا عَظِيمًا",
+        "translation": "Not equal are those believers remaining [at home] - other than the disabled - and the mujāhideen, [who strive and fight] in the cause of Allāh with their wealth and their lives. Allāh has preferred the mujāhideen through their wealth and their lives over those who remain [behind], by degrees. And to all [i.e., both] Allāh has promised the best [reward]. But Allāh has preferred the mujāhideen over those who remain [behind] with a great reward -",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "4:95",
+        "context": "Authentic Quranic usage in action context",
+        "wordForm": "جِهَاد",
+        "surah": 4,
+        "ayah": 95
+      }
+    ],
+    "etymology": "Authentic three-letter root ج ه د from Quranic text",
+    "relatedRoots": [],
+    "quranicReferences": [
+      "2:218",
+      "3:142",
+      "4:95",
+      "9:16",
+      "9:20",
+      "25:52",
+      "29:6"
+    ]
+  },
+  {
+    "id": "root_8",
+    "root": "ش ك ر",
+    "transliteration": "sh-k-r",
+    "meanings": [
+      "to thank, be grateful"
+    ],
+    "category": "ethics",
+    "type": "authentic_root",
+    "difficulty": "intermediate",
+    "derivatives": [
+      {
+        "word": "شُكْر",
+        "transliteration": "shkr",
+        "meaning": "to thank, be grateful",
+        "occurrences": 59,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "شَاكِر",
+        "transliteration": "shkr",
+        "meaning": "to thank, be grateful",
+        "occurrences": 14,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "شَكُور",
+        "transliteration": "shkr",
+        "meaning": "to thank, be grateful",
+        "occurrences": 23,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "مَشْكُور",
+        "transliteration": "shkr",
+        "meaning": "to thank, be grateful",
+        "occurrences": 10,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "شَكَرَ",
+        "transliteration": "shkr",
+        "meaning": "to thank, be grateful",
+        "occurrences": 57,
+        "morphology": "Authentic Quranic form"
+      }
+    ],
+    "examples": [
+      {
+        "ayahArabic": "ثُمَّ عَفَوْنَا عَنكُم مِّنۢ بَعْدِ ذَٰلِكَ لَعَلَّكُمْ تَشْكُرُونَ",
+        "translation": "Then We forgave you after that so perhaps you would be grateful.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:52",
+        "context": "Authentic Quranic usage in ethics context",
+        "wordForm": "شُكْر",
+        "surah": 2,
+        "ayah": 52
+      },
+      {
+        "ayahArabic": "ثُمَّ بَعَثْنَـٰكُم مِّنۢ بَعْدِ مَوْتِكُمْ لَعَلَّكُمْ تَشْكُرُونَ",
+        "translation": "Then We revived you after your death that perhaps you would be grateful.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:56",
+        "context": "Authentic Quranic usage in ethics context",
+        "wordForm": "شُكْر",
+        "surah": 2,
+        "ayah": 56
+      },
+      {
+        "ayahArabic": "فَٱذْكُرُونِىٓ أَذْكُرْكُمْ وَٱشْكُرُوا۟ لِى وَلَا تَكْفُرُونِ",
+        "translation": "So remember Me; I will remember you. And be grateful to Me and do not deny Me.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:152",
+        "context": "Authentic Quranic usage in ethics context",
+        "wordForm": "شُكْر",
+        "surah": 2,
+        "ayah": 152
+      }
+    ],
+    "etymology": "Authentic three-letter root ش ك ر from Quranic text",
+    "relatedRoots": [],
+    "quranicReferences": [
+      "2:52",
+      "2:56",
+      "2:152",
+      "14:7",
+      "16:14",
+      "31:12",
+      "76:9"
+    ]
+  },
+  {
+    "id": "root_9",
+    "root": "ص ب ر",
+    "transliteration": "s-b-r",
+    "meanings": [
+      "to be patient, persevere"
+    ],
+    "category": "ethics",
+    "type": "authentic_root",
+    "difficulty": "intermediate",
+    "derivatives": [
+      {
+        "word": "صَبْر",
+        "transliteration": "sbr",
+        "meaning": "to be patient, persevere",
+        "occurrences": 52,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "صَابِر",
+        "transliteration": "sbr",
+        "meaning": "to be patient, persevere",
+        "occurrences": 30,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "صَبُور",
+        "transliteration": "sbr",
+        "meaning": "to be patient, persevere",
+        "occurrences": 55,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "صَبَرَ",
+        "transliteration": "sbr",
+        "meaning": "to be patient, persevere",
+        "occurrences": 13,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "اصْطَبَرَ",
+        "transliteration": "sbr",
+        "meaning": "to be patient, persevere",
+        "occurrences": 58,
+        "morphology": "Authentic Quranic form"
+      }
+    ],
+    "examples": [
+      {
+        "ayahArabic": "وَٱسْتَعِينُوا۟ بِٱلصَّبْرِ وَٱلصَّلَوٰةِ ۚ وَإِنَّهَا لَكَبِيرَةٌ إِلَّا عَلَى ٱلْخَـٰشِعِينَ",
+        "translation": "And seek help through patience and prayer; and indeed, it is difficult except for the humbly submissive [to Allāh]",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:45",
+        "context": "Authentic Quranic usage in ethics context",
+        "wordForm": "صَبْر",
+        "surah": 2,
+        "ayah": 45
+      },
+      {
+        "ayahArabic": "يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ ٱسْتَعِينُوا۟ بِٱلصَّبْرِ وَٱلصَّلَوٰةِ ۚ إِنَّ ٱللَّهَ مَعَ ٱلصَّـٰبِرِينَ",
+        "translation": "O you who have believed, seek help through patience and prayer. Indeed, Allāh is with the patient.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:153",
+        "context": "Authentic Quranic usage in ethics context",
+        "wordForm": "صَبْر",
+        "surah": 2,
+        "ayah": 153
+      },
+      {
+        "ayahArabic": "وَلَنَبْلُوَنَّكُم بِشَىْءٍ مِّنَ ٱلْخَوْفِ وَٱلْجُوعِ وَنَقْصٍ مِّنَ ٱلْأَمْوَٰلِ وَٱلْأَنفُسِ وَٱلثَّمَرَٰتِ ۗ وَبَشِّرِ ٱلصَّـٰبِرِينَ",
+        "translation": "And We will surely test you with something of fear and hunger and a loss of wealth and lives and fruits, but give good tidings to the patient,",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:155",
+        "context": "Authentic Quranic usage in ethics context",
+        "wordForm": "صَبْر",
+        "surah": 2,
+        "ayah": 155
+      }
+    ],
+    "etymology": "Authentic three-letter root ص ب ر from Quranic text",
+    "relatedRoots": [],
+    "quranicReferences": [
+      "2:45",
+      "2:153",
+      "2:155",
+      "3:200",
+      "11:11",
+      "16:126",
+      "103:3"
+    ]
+  },
+  {
+    "id": "root_10",
+    "root": "ر ح م",
+    "transliteration": "r-h-m",
+    "meanings": [
+      "mercy, compassion"
+    ],
+    "category": "divine",
+    "type": "authentic_root",
+    "difficulty": "beginner",
+    "derivatives": [
+      {
+        "word": "رَحْمَة",
+        "transliteration": "rhm",
+        "meaning": "mercy, compassion",
+        "occurrences": 41,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "رَحِيم",
+        "transliteration": "rhm",
+        "meaning": "mercy, compassion",
+        "occurrences": 27,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "رَحْمَن",
+        "transliteration": "rhm",
+        "meaning": "mercy, compassion",
+        "occurrences": 35,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "رَحِمَ",
+        "transliteration": "rhm",
+        "meaning": "mercy, compassion",
+        "occurrences": 46,
+        "morphology": "Authentic Quranic form"
+      },
+      {
+        "word": "مَرْحُوم",
+        "transliteration": "rhm",
+        "meaning": "mercy, compassion",
+        "occurrences": 25,
+        "morphology": "Authentic Quranic form"
+      }
+    ],
+    "examples": [
+      {
+        "ayahArabic": "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ",
+        "translation": "In the name of Allāh,<sup foot_note=195932>1</sup> the Entirely Merciful, the Especially Merciful.<sup foot_note=195931>2</sup>",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "1:1",
+        "context": "Authentic Quranic usage in divine context",
+        "wordForm": "رَحْمَة",
+        "surah": 1,
+        "ayah": 1
+      },
+      {
+        "ayahArabic": "ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ",
+        "translation": "The Entirely Merciful, the Especially Merciful,",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "1:3",
+        "context": "Authentic Quranic usage in divine context",
+        "wordForm": "رَحْمَة",
+        "surah": 1,
+        "ayah": 3
+      },
+      {
+        "ayahArabic": "فَتَلَقَّىٰٓ ءَادَمُ مِن رَّبِّهِۦ كَلِمَـٰتٍ فَتَابَ عَلَيْهِ ۚ إِنَّهُۥ هُوَ ٱلتَّوَّابُ ٱلرَّحِيمُ",
+        "translation": "Then Adam received from his Lord [some] words,<sup foot_note=195951>1</sup> and He accepted his repentance. Indeed, it is He who is the Accepting of Repentance,<sup foot_note=195950>2</sup> the Merciful.",
+        "transliteration": "[Transliteration to be added]",
+        "ref": "2:37",
+        "context": "Authentic Quranic usage in divine context",
+        "wordForm": "رَحْمَة",
+        "surah": 2,
+        "ayah": 37
+      }
+    ],
+    "etymology": "Authentic three-letter root ر ح م from Quranic text",
+    "relatedRoots": [],
+    "quranicReferences": [
+      "1:1",
+      "1:3",
+      "2:37",
+      "2:54",
+      "2:160",
+      "7:156",
+      "12:64",
+      "21:107"
+    ]
+  }
+];
         
         let currentIndex = 0;
-        let showingDetails = false;
-        
-        function updateDisplay() {
-            console.log('Updating display, index:', currentIndex);
+        let filteredCards = [...flashcards];
+        let showDetails = false;
+        let readWords = new Set();
+
+        function loadProgress() {
+            const saved = localStorage.getItem('quranFlashcardsProgress');
+            if (saved) {
+                const data = JSON.parse(saved);
+                readWords = new Set(data.readWords || []);
+                currentIndex = data.lastIndex || 0;
+                showDetails = data.showDetails || false;
+            }
+        }
+
+        function saveProgress() {
+            const data = {
+                readWords: Array.from(readWords),
+                lastIndex: currentIndex,
+                showDetails: showDetails
+            };
+            localStorage.setItem('quranFlashcardsProgress', JSON.stringify(data));
+        }
+
+        function displayCard() {
+            if (filteredCards.length === 0) {
+                document.getElementById('arabic').textContent = 'No results';
+                return;
+            }
             
-            const card = cards[currentIndex];
+            const card = filteredCards[currentIndex];
+            const cardElement = document.getElementById('mainCard');
+            const readStatusElement = document.getElementById('readStatus');
             
-            // Update card content
-            document.getElementById('arabic').textContent = card.arabic;
-            document.getElementById('transliteration').textContent = card.transliteration;
-            document.getElementById('meanings').textContent = card.meanings;
-            
-            // Update counter
-            document.getElementById('current').textContent = currentIndex + 1;
-            document.getElementById('total').textContent = cards.length;
-            
-            // Update verse section
-            const verseSection = document.getElementById('verseSection');
-            const verseContent = document.getElementById('verseContent');
-            const toggleBtn = document.getElementById('toggleBtn');
-            
-            if (showingDetails) {
-                verseContent.innerHTML = `
-                    <div class="verse">
-                        <div class="verse-arabic">${card.verse.arabic}</div>
-                        <div class="verse-translation">${card.verse.translation}</div>
-                        <div class="verse-ref">[${card.verse.ref}]</div>
-                    </div>
-                `;
-                verseSection.style.display = 'block';
-                toggleBtn.textContent = 'Hide Details';
+            const isRead = readWords.has(card.id);
+            if (isRead) {
+                cardElement.classList.add('read');
+                readStatusElement.classList.add('read');
+                readStatusElement.textContent = '✓';
             } else {
-                verseSection.style.display = 'none';
-                toggleBtn.textContent = 'Show Details';
+                cardElement.classList.remove('read');
+                readStatusElement.classList.remove('read');
+                readStatusElement.textContent = '○';
             }
             
-            // Update button states
-            document.getElementById('prevBtn').disabled = (currentIndex === 0);
-            document.getElementById('nextBtn').disabled = (currentIndex === cards.length - 1);
+            document.getElementById('arabic').textContent = card.root || '';
+            document.getElementById('transliteration').textContent = card.transliteration || '';
+            document.getElementById('meanings').textContent = Array.isArray(card.meanings) ? card.meanings.join(', ') : card.meanings || '';
+            document.getElementById('typeBadge').textContent = (card.type || 'root').toUpperCase();
+            document.getElementById('categoryBadge').textContent = (card.category || '').toUpperCase();
+            document.getElementById('difficultyBadge').textContent = (card.difficulty || '').toUpperCase();
+            document.getElementById('current').textContent = currentIndex + 1;
+            document.getElementById('total').textContent = filteredCards.length;
+            
+            document.getElementById('readCount').textContent = readWords.size;
+            const progressPercent = Math.round((readWords.size / flashcards.length) * 100);
+            document.getElementById('progressPercent').textContent = progressPercent + '%';
+            document.getElementById('progressFill').style.width = progressPercent + '%';
+            
+            const versesSection = document.getElementById('versesSection');
+            const versesDiv = document.getElementById('verses');
+            const verseCountSpan = document.getElementById('verseCount');
+            
+            if (showDetails && card.examples && card.examples.length > 0) {
+                versesDiv.innerHTML = card.examples
+                    .map(v => `
+                        <div class="verse">
+                            <div class="verse-arabic">${v.ayahArabic || ''}</div>
+                            <div class="verse-translation">${v.translation || ''}</div>
+                            <div class="verse-ref">[${v.ref || ''}]</div>
+                        </div>
+                    `).join('');
+                verseCountSpan.textContent = `(${card.examples.length})`;
+                versesSection.style.display = 'block';
+            } else {
+                versesSection.style.display = 'none';
+                verseCountSpan.textContent = '';
+            }
+            
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            document.getElementById('nextBtn').disabled = currentIndex === filteredCards.length - 1;
+            document.getElementById('toggleBtn').textContent = showDetails ? 'Hide Details' : 'Show Details';
+            
+            saveProgress();
         }
-        
+
+        function toggleReadStatus() {
+            const card = filteredCards[currentIndex];
+            if (readWords.has(card.id)) {
+                readWords.delete(card.id);
+            } else {
+                readWords.add(card.id);
+            }
+            displayCard();
+        }
+
+        function toggleDetails() {
+            showDetails = !showDetails;
+            displayCard();
+        }
+
         function nextCard() {
-            console.log('Next clicked');
-            if (currentIndex < cards.length - 1) {
+            if (currentIndex < filteredCards.length - 1) {
                 currentIndex++;
-                updateDisplay();
+                displayCard();
             }
         }
-        
-        function prevCard() {
-            console.log('Previous clicked');
+
+        function previousCard() {
             if (currentIndex > 0) {
                 currentIndex--;
-                updateDisplay();
+                displayCard();
             }
         }
-        
-        function toggleDetails() {
-            console.log('Toggle details clicked');
-            showingDetails = !showingDetails;
-            updateDisplay();
+
+        function shuffleCard() {
+            currentIndex = Math.floor(Math.random() * filteredCards.length);
+            displayCard();
         }
-        
-        function randomCard() {
-            console.log('Random clicked');
-            currentIndex = Math.floor(Math.random() * cards.length);
-            updateDisplay();
+
+        function searchCards() {
+            const query = document.getElementById('searchBox').value.toLowerCase().trim();
+            
+            if (query === '') {
+                filteredCards = [...flashcards];
+            } else {
+                filteredCards = flashcards.filter(card => 
+                    (card.root || '').includes(query) ||
+                    (card.transliteration || '').toLowerCase().includes(query) ||
+                    JSON.stringify(card.meanings || []).toLowerCase().includes(query) ||
+                    (card.category || '').toLowerCase().includes(query)
+                );
+            }
+            
+            currentIndex = 0;
+            displayCard();
         }
-        
-        // Add event listeners when page loads
+
+        // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Page loaded, setting up events');
-            
             document.getElementById('nextBtn').onclick = nextCard;
-            document.getElementById('prevBtn').onclick = prevCard;
+            document.getElementById('prevBtn').onclick = previousCard;
             document.getElementById('toggleBtn').onclick = toggleDetails;
-            document.getElementById('randomBtn').onclick = randomCard;
+            document.getElementById('randomBtn').onclick = shuffleCard;
+            document.getElementById('readStatus').onclick = toggleReadStatus;
             
-            // Keyboard shortcuts
+            let searchTimeout;
+            document.getElementById('searchBox').addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(searchCards, 300);
+            });
+
             document.addEventListener('keydown', function(e) {
                 switch(e.key) {
-                    case 'ArrowRight':
-                        nextCard();
-                        break;
-                    case 'ArrowLeft':
-                        prevCard();
-                        break;
-                    case 'd':
-                    case 'D':
-                        toggleDetails();
-                        break;
-                    case 'r':
-                    case 'R':
-                        randomCard();
-                        break;
+                    case 'ArrowLeft': previousCard(); break;
+                    case 'ArrowRight': nextCard(); break;
+                    case ' ': e.preventDefault(); shuffleCard(); break;
+                    case 'd': case 'D': toggleDetails(); break;
+                    case 'm': case 'M': toggleReadStatus(); break;
                 }
             });
+
+            loadProgress();
+            displayCard();
             
-            // Initial display
-            updateDisplay();
-            
-            console.log('Setup complete!');
+            console.log('🌐 Original Quranic Arabic Flashcards loaded!');
+            console.log('📊 Total entries:', flashcards.length);
         });
     </script>
 </body>
