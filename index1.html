@@ -418,32 +418,7 @@
                     <div class="stat-label">Read Today</div>
                 </div>
             </div>
-                <div class="progress-stats">
-                    <span id="readCount">0</span> read • <span id="progressPercent">0%</span> complete
-                </div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            
-            <div class="stats-panel">
-                <div class="stat-item">
-                    <div class="stat-number" id="totalRoots">981</div>
-                    <div class="stat-label">Total Roots</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="totalDerivatives">0</div>
-                    <div class="stat-label">Derivatives</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="totalVerses">0</div>
-                    <div class="stat-label">Verses</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number" id="readToday">0</div>
-                    <div class="stat-label">Read Today</div>
-                </div>
-            </div>
+        </div>
         
         <div class="tabs">
             <div class="tab active" id="rootWordsTab" onclick="switchTab('rootWords')">
@@ -29017,14 +28992,49 @@
 
         // Check if card is a particle (preposition/pronoun)
         function isParticle(card) {
-            const type = (card.type || '').toLowerCase();
-            const category = (card.category || '').toLowerCase();
-            return type.includes('particle') || 
-                   type.includes('preposition') || 
-                   type.includes('pronoun') ||
-                   category.includes('particle') ||
-                   category.includes('preposition') ||
-                   category.includes('pronoun');
+            const arabic = card.arabic || '';
+            const meaning = card.meaning || '';
+            
+            // Comprehensive list based on reference images
+            const particles = [
+                // Prepositions (from your table)
+                'في', 'إلى', 'على', 'من', 'لِ', 'مع', 'بِ', 'حتى', 'منذ', 'مذ', 'عن', 'كَ', 'ت', 'و', 'او', 'القسم', 'رُبَّ',
+                
+                // Detached Pronouns
+                'أنا', 'نحن', 'أنت', 'أنتما', 'أنتم', 'أنتن', 'هو', 'هما', 'هم', 'هي', 'هن',
+                
+                // Demonstrative Pronouns
+                'هذا', 'هذان', 'هؤلاء', 'هذه', 'هتان', 'تان', 'ذلك', 'ذان', 'ذلكما', 'أولئك', 'تلك', 'تانك', 'تلكما', 'أولئك',
+                
+                // Ism Mawsool (Relative Pronouns)
+                'الذي', 'اللذان', 'الذين', 'التي', 'اللتان', 'اللاتي', 'اللواتي', 'من', 'ما', 'مَن', 'مَا',
+                
+                // Common particles and conjunctions
+                'أن', 'إن', 'كان', 'لكن', 'بل', 'أم', 'أو', 'لا', 'ما', 'لم', 'لن', 'قد', 'لقد', 'كي', 'لكي',
+                
+                // Attached pronouns (as they appear in derivatives)
+                'ي', 'ك', 'ه', 'ها', 'نا', 'كم', 'كن', 'هم', 'هن', 'كما', 'هما'
+            ];
+            
+            // Check if the Arabic text matches any particle
+            if (particles.includes(arabic)) {
+                return true;
+            }
+            
+            // Check if it's a pronoun or preposition by meaning
+            const lowerMeaning = meaning.toLowerCase();
+            return lowerMeaning.includes('pronoun') ||
+                   lowerMeaning.includes('preposition') ||
+                   lowerMeaning.includes('particle') ||
+                   lowerMeaning.includes('demonstrative') ||
+                   lowerMeaning.includes('relative') ||
+                   lowerMeaning.includes('possessive') ||
+                   lowerMeaning.includes('attached') ||
+                   lowerMeaning.includes('detached') ||
+                   // Common English pronouns
+                   lowerMeaning.match(/\b(i|you|he|she|it|we|they|me|him|her|us|them|my|your|his|her|its|our|their)\b/) ||
+                   // Common preposition meanings
+                   lowerMeaning.match(/\b(in|on|at|to|from|with|by|for|about|like|as|until|since|few|more)\b/);
         }
 
         // Toggle read status
@@ -29134,17 +29144,23 @@
         }
         
         function toggleReadStatus() {
+            console.log('📖 Toggle read status called');
             const card = filteredCards[currentIndex];
+            console.log('📄 Current card:', card.id, card.arabic);
             if (readWords.has(card.id)) {
                 readWords.delete(card.id);
+                console.log('✅ Marked as unread');
             } else {
                 readWords.add(card.id);
+                console.log('✅ Marked as read');
             }
             displayCard();
             saveProgress();
+            updateProgressDisplay();
         }
         
         function switchTab(tabName) {
+            console.log('🔄 Switching to tab:', tabName);
             currentTab = tabName;
             document.querySelectorAll('.tab').forEach(function(tab) {
                 tab.classList.remove('active');
@@ -29164,17 +29180,19 @@
             rootWordsData = [];
             particlesData = [];
             
-            flashcards.forEach(function(card) {
-                const type = (card.type || '').toLowerCase();
-                const category = (card.category || '').toLowerCase();
-                
-                if (type.includes('particle') || type.includes('preposition') || type.includes('pronoun') ||
-                    category.includes('particle') || category.includes('preposition') || category.includes('pronoun')) {
+            console.log('🔍 Categorizing data...');
+            flashcards.forEach(function(card, index) {
+                if (isParticle(card)) {
                     particlesData.push(card);
+                    if (index < 10) { // Log first 10 particles for debugging
+                        console.log('📝 Particle detected:', card.arabic || card.root, '-', card.meaning);
+                    }
                 } else {
                     rootWordsData.push(card);
                 }
             });
+            
+            console.log('📊 Final counts - Root words:', rootWordsData.length, 'Particles:', particlesData.length);
             
             document.getElementById('rootWordsCount').textContent = '(' + rootWordsData.length + ')';
             document.getElementById('particlesCount').textContent = '(' + particlesData.length + ')';
@@ -29215,7 +29233,7 @@
             }
             
             // Update card content
-            document.getElementById('arabic').textContent = card.root || '';
+            document.getElementById('arabic').textContent = card.arabic || card.root || '';
             document.getElementById('transliteration').textContent = card.transliteration || '';
             document.getElementById('meanings').textContent = Array.isArray(card.meanings) ? card.meanings.join(', ') : card.meanings || '';
             
@@ -29232,8 +29250,8 @@
             
             if (showDetails && derivativesSection && derivativesDiv) {
                 if (isParticle(card)) {
-                    // For particles, show the root as the full word
-                    derivativesDiv.innerHTML = '<div class="derivative particle-word">' + (card.root || '') + '</div>';
+                    // For particles, show the Arabic word as the full word
+                    derivativesDiv.innerHTML = '<div class="derivative particle-word" style="background: rgba(251, 191, 36, 0.2); border: 2px solid #fbbf24; font-size: 1.2em; font-weight: bold; text-align: center; padding: 15px;">' + (card.arabic || card.root || '') + '</div>';
                     derivativesSection.style.display = 'block';
                 } else if (card.derivatives && card.derivatives.length > 0) {
                     if (currentTab === 'particles') {
@@ -29361,11 +29379,39 @@
         });
 
         // Initialize
+        console.log('🚀 Starting initialization...');
         categorizeData();
+        console.log('📊 Data categorized - Root words:', rootWordsData.length, 'Particles:', particlesData.length);
         loadProgress();
+        updateProgressDisplay();
+        console.log('✅ Progress loaded and display updated');
         
         // Add event listeners
-        document.getElementById('readStatus').addEventListener('click', toggleReadStatus);
+        console.log('🔗 Adding event listeners...');
+        const readStatusEl = document.getElementById('readStatus');
+        const rootWordsTabEl = document.getElementById('rootWordsTab');
+        const particlesTabEl = document.getElementById('particlesTab');
+        
+        if (readStatusEl) {
+            readStatusEl.addEventListener('click', toggleReadStatus);
+            console.log('✅ Read status event listener added');
+        } else {
+            console.error('❌ Read status element not found');
+        }
+        
+        if (rootWordsTabEl) {
+            rootWordsTabEl.addEventListener('click', function() { switchTab('rootWords'); });
+            console.log('✅ Root words tab event listener added');
+        } else {
+            console.error('❌ Root words tab element not found');
+        }
+        
+        if (particlesTabEl) {
+            particlesTabEl.addEventListener('click', function() { switchTab('particles'); });
+            console.log('✅ Particles tab event listener added');
+        } else {
+            console.error('❌ Particles tab element not found');
+        }
         
         displayCard();
         console.log('🌐 Complete Quranic Arabic Flashcards loaded!');
